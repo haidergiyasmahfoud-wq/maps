@@ -1,366 +1,412 @@
-=// ========== المتغيرات ==========
-let map, std, sat, ter, curL = 'standard', curM = null, uM = null, uC = null;
-let uLat = null, uLng = null, uSpd = null, wId = null;
-let favs = JSON.parse(localStorage.getItem('fvs') || '[]');
-let hist = JSON.parse(localStorage.getItem('hst') || '[]');
-let nav = false, navM = 'driving', navL = null, navKs = [];
-let rS = null, rE = null, sLat = null, sLng = null, sNam = '', vOn = false;
+// ========== المتغيرات ==========
+let map, userMarker, userCircle, currentMarker, routeLine;
+let userLat, userLng, userSpeed;
+let navigationMode = 'driving';
+let routeStart, routeEnd;
+let isPickingOnMap = false;
+let favorites = JSON.parse(localStorage.getItem('mapFavs') || '[]');
 
-const cts = {
-    'دمشق':[33.5138,36.2765], 'حلب':[36.2021,37.1343], 'حمص':[34.7324,36.7137],
-    'اللاذقية':[35.5214,35.7924], 'حماة':[35.1318,36.7578], 'دير الزور':[35.3333,40.1500]
+const cities = {
+    'دمشق': [33.5138, 36.2765],
+    'حلب': [36.2021, 37.1343],
+    'حمص': [34.7324, 36.7137],
+    'اللاذقية': [35.5214, 35.7924],
+    'حماة': [35.1318, 36.7578],
+    'دير الزور': [35.3333, 40.1500],
+    'الرقة': [35.9500, 39.0167],
+    'طرطوس': [34.8833, 35.8833]
 };
 
-// ========== تهيئة ==========
-document.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('theme') === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>';
-        document.getElementById('dark1').checked = true;
-        document.getElementById('dark2').checked = true;
-    }
-    initMap();
-    initEvents();
-    startGPS();
-    renderFavs();
-    setTimeout(() => document.getElementById('loadingScreen').classList.add('hide'), 1500);
-});
-
-// ========== خريطة ==========
+// ========== تهيئة الخريطة ==========
 function initMap() {
-    map = L.map('map', { center:[34.8021,38.9968], zoom:7, zoomControl:false, attributionControl:false });
-    std = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19 }).addTo(map);
-    sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom:19 });
-    ter = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom:17 });
-    map.on('click', onMap);
-}
+    map = L.map('map', {
+        center: [34.8021, 38.9968],
+        zoom: 7,
+        zoomControl: false
+    });
 
-function onMap(e) {
-    const { lat, lng } = e.latlng;
-    if (document.getElementById('pickMap').dataset.on === '1') {
-        document.getElementById('endInp').value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-        rE = { lat, lng, name:'الوجهة' };
-        document.getElementById('pickMap').dataset.on = '0';
-        document.getElementById('pickMap').style.background = '';
-        map.getContainer().style.cursor = '';
-        calcRt(); return;
-    }
-    addMrk(lat, lng);
-    getNm(lat, lng).then(n => {
-        if (curM) curM.bindPopup(popup(n, lat, lng)).openPopup();
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19
+    }).addTo(map);
+
+    map.on('click', function(e) {
+        if (isPickingOnMap) {
+            const { lat, lng } = e.latlng;
+            document.getElementById('endInput').value = lat.toFixed(5) + ', ' + lng.toFixed(5);
+            routeEnd = { lat, lng };
+            isPickingOnMap = false;
+            document.getElementById('pickOnMap').style.color = '#4facfe';
+            calculateRoute();
+        } else {
+            addMarker(e.latlng.lat, e.latlng.lng);
+        }
     });
 }
 
-function addMrk(lat, lng) {
-    if (curM) map.removeLayer(curM);
-    const ic = L.divIcon({ className:'custom-marker', html:'<div class="marker-pin"></div>', iconSize:[24,36], iconAnchor:[12,36] });
-    curM = L.marker([lat, lng], { icon:ic }).addTo(map);
-    map.flyTo([lat, lng], 15, { duration:1 });
+// ========== إضافة علامة ==========
+function addMarker(lat, lng) {
+    if (currentMarker) map.removeLayer(currentMarker);
+    
+    const icon = L.divIcon({
+        className: '',
+        html: '<div style="width:25px;height:25px;background:#4facfe;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);"></div>',
+        iconSize: [25, 35],
+        iconAnchor: [12, 35]
+    });
+    
+    currentMarker = L.marker([lat, lng], { icon }).addTo(map);
+    map.flyTo([lat, lng], 15);
+    getAddress(lat, lng).then(name => {
+        currentMarker.bindPopup('<b>' + name + '</b>').openPopup();
+    });
 }
 
-function popup(n, lat, lng) {
-    return `<div style="text-align:right;padding:4px;"><b>${n||'موقع'}</b><br><small style="color:#8fa3b8;">${lat.toFixed(5)}, ${lng.toFixed(5)}</small>
-    <div style="margin-top:6px;display:flex;gap:4px;">
-    <button onclick="goTo(${lat},${lng})" style="padding:4px 8px;background:#4facfe;border:none;border-radius:4px;color:#fff;cursor:pointer;font-size:11px;">🚗</button>
-    <button onclick="share(${lat},${lng},'${n}')" style="padding:4px 8px;background:#8b5cf6;border:none;border-radius:4px;color:#fff;cursor:pointer;font-size:11px;">📤</button>
-    <button onclick="addFv('${n}',${lat},${lng})" style="padding:4px 8px;background:#06d6a0;border:none;border-radius:4px;color:#fff;cursor:pointer;font-size:11px;">❤️</button>
-    </div></div>`;
+// ========== الحصول على العنوان ==========
+async function getAddress(lat, lng) {
+    try {
+        const res = await fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&accept-language=ar');
+        const data = await res.json();
+        return data.display_name || 'موقع غير معروف';
+    } catch(e) {
+        return 'موقع غير معروف';
+    }
 }
 
-async function getNm(lat, lng) {
-    try { const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=ar`); return (await r.json()).display_name || 'موقع'; }
-    catch { return 'موقع'; }
+// ========== تحديد الموقع ==========
+function locateUser() {
+    if (!navigator.geolocation) {
+        showToast('متصفحك لا يدعم تحديد الموقع');
+        return;
+    }
+    
+    showToast('جاري تحديد موقعك...');
+    
+    navigator.geolocation.getCurrentPosition(function(pos) {
+        userLat = pos.coords.latitude;
+        userLng = pos.coords.longitude;
+        userSpeed = pos.coords.speed;
+        
+        updateUserMarker();
+        map.setView([userLat, userLng], 16);
+        showToast('تم تحديد موقعك ✓');
+        
+        // متابعة الموقع
+        navigator.geolocation.watchPosition(function(p) {
+            userLat = p.coords.latitude;
+            userLng = p.coords.longitude;
+            userSpeed = p.coords.speed;
+            updateUserMarker();
+        }, null, { enableHighAccuracy: true });
+        
+    }, function(err) {
+        showToast('تعذر تحديد الموقع: ' + err.message);
+    }, { enableHighAccuracy: true, timeout: 10000 });
 }
 
-// ========== GPS ==========
-function startGPS() {
-    if (!navigator.geolocation) return;
-    wId = navigator.geolocation.watchPosition(p => {
-        uLat = p.coords.latitude; uLng = p.coords.longitude; uSpd = p.coords.speed;
-        updUsr(); if (nav) chkNav();
-    }, null, { enableHighAccuracy:true, timeout:30000, maximumAge:0 });
+function updateUserMarker() {
+    if (!userLat || !userLng) return;
+    
+    if (userMarker) map.removeLayer(userMarker);
+    if (userCircle) map.removeLayer(userCircle);
+    
+    const icon = L.divIcon({
+        className: '',
+        html: '<div style="width:22px;height:22px;background:#f44336;border-radius:50%;border:3px solid white;box-shadow:0 0 15px rgba(244,67,54,0.6);"></div>',
+        iconSize: [22, 22],
+        iconAnchor: [11, 11]
+    });
+    
+    userMarker = L.marker([userLat, userLng], { icon }).addTo(map);
+    userCircle = L.circle([userLat, userLng], {
+        radius: 50,
+        color: '#f44336',
+        fillColor: '#f44336',
+        fillOpacity: 0.1,
+        weight: 1
+    }).addTo(map);
 }
 
-function updUsr() {
-    if (!uLat) return;
-    if (uM) map.removeLayer(uM);
-    if (uC) map.removeLayer(uC);
-    const ic = L.divIcon({ className:'custom-marker', html:'<div class="marker-pin u"></div>', iconSize:[24,36], iconAnchor:[12,36] });
-    uM = L.marker([uLat, uLng], { icon:ic }).addTo(map);
-    uC = L.circle([uLat, uLng], { radius:30, color:'#ff6b6b', fillOpacity:.1, weight:1 }).addTo(map);
+// ========== حساب المسار ==========
+function calculateRoute() {
+    if (!routeStart || !routeEnd) return;
+    
+    const speeds = { driving: 60, walking: 5, bicycling: 15 };
+    const speed = speeds[navigationMode];
+    
+    const R = 6371;
+    const dLat = (routeEnd.lat - routeStart.lat) * Math.PI / 180;
+    const dLng = (routeEnd.lng - routeStart.lng) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(routeStart.lat * Math.PI / 180) * Math.cos(routeEnd.lat * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distance = R * c;
+    
+    const timeMinutes = Math.round((distance / speed) * 60);
+    
+    document.getElementById('routeDist').textContent = distance.toFixed(1) + ' كم';
+    document.getElementById('routeTime').textContent = timeMinutes < 60 ? timeMinutes + ' دقيقة' : Math.floor(timeMinutes/60) + ' ساعة و ' + (timeMinutes%60) + ' دقيقة';
+    document.getElementById('routeInfo').style.display = 'block';
+    
+    if (routeLine) map.removeLayer(routeLine);
+    routeLine = L.polyline([[routeStart.lat, routeStart.lng], [routeEnd.lat, routeEnd.lng]], {
+        color: '#4facfe',
+        weight: 4,
+        dashArray: '10, 10'
+    }).addTo(map);
+    
+    const bounds = L.latLngBounds([[routeStart.lat, routeStart.lng], [routeEnd.lat, routeEnd.lng]]);
+    map.fitBounds(bounds, { padding: [50, 50] });
 }
 
-// ========== مسار ==========
-function calcRt() {
-    if (!rS || !rE) return;
-    const sp = { driving:60, walking:5, bicycling:15 };
-    const a = L.latLng(rS.lat, rS.lng), b = L.latLng(rE.lat, rE.lng);
-    const d = a.distanceTo(b), km = (d/1000).toFixed(1);
-    const mn = Math.round(d/1000/sp[navM]*60);
-    document.getElementById('rDist').textContent = km+' كم';
-    document.getElementById('rTime').textContent = mn<60 ? mn+' د' : Math.floor(mn/60)+' س '+(mn%60)+' د';
-    document.getElementById('rpResult').style.display = 'flex';
-    if (navL) map.removeLayer(navL);
-    navL = L.polyline([a,b], { color:'#4facfe', weight:3, dashArray:'8,8' }).addTo(map);
-    map.fitBounds(L.latLngBounds([a,b]), { padding:[60,60] });
+// ========== الملاحة ==========
+function startNavigation() {
+    if (!routeStart || !routeEnd) {
+        showToast('الرجاء تحديد نقطة الانطلاق والوجهة');
+        return;
+    }
+    
+    if (!userLat || !userLng) {
+        showToast('الرجاء تحديد موقعك أولاً');
+        return;
+    }
+    
+    map.setView([userLat, userLng], 17);
+    showToast('تم بدء الملاحة 🚗');
+    
+    // إضافة للسجل
+    let history = JSON.parse(localStorage.getItem('mapHistory') || '[]');
+    history.unshift({
+        date: new Date().toLocaleString('ar'),
+        from: routeStart.name || 'نقطة الانطلاق',
+        to: routeEnd.name || 'الوجهة'
+    });
+    localStorage.setItem('mapHistory', JSON.stringify(history));
 }
 
-function startNav() {
-    if (!rS || !rE) { tst('حدد نقطة الانطلاق والوجهة'); return; }
-    nav = true;
-    document.getElementById('navTop').style.display = 'flex';
-    document.getElementById('rpResult').style.display = 'none';
-    const ic = L.divIcon({ className:'custom-marker', html:'<div class="marker-pin n"></div>', iconSize:[24,36], iconAnchor:[12,36] });
-    navKs.push(L.marker([rE.lat, rE.lng], { icon:ic }).addTo(map));
-    if (uLat) map.setView([uLat, uLng], 16);
-    hist.unshift({ id:Date.now(), from:rS.name, to:rE.name, date:new Date().toLocaleString('ar'), mode:navM });
-    if (hist.length>30) hist=hist.slice(0,30);
-    localStorage.setItem('hst', JSON.stringify(hist));
-    chkNav(); tst('🚗 تم بدء الملاحة');
+// ========== البحث عن مدينة ==========
+function searchCity(name) {
+    const coords = cities[name];
+    if (coords) {
+        addMarker(coords[0], coords[1]);
+        showToast('تم الانتقال إلى ' + name);
+    }
 }
 
-function chkNav() {
-    if (!nav || !uLat || !rE) return;
-    const u = L.latLng(uLat, uLng), e = L.latLng(rE.lat, rE.lng);
-    const rem = u.distanceTo(e), km = (rem/1000).toFixed(1);
-    const b = brng(uLat, uLng, rE.lat, rE.lng);
-    const dirs = ['شمال','شمال شرق','شرق','جنوب شرق','جنوب','جنوب غرب','غرب','شمال غرب'];
-    const dir = 'اتجه '+dirs[Math.round(b/45)%8];
-    const spd = uSpd ? (uSpd*3.6).toFixed(0) : '0';
-    const tL = spd>0 ? Math.round(rem/(spd/3.6)/60) : '--';
-    document.getElementById('navDir').textContent = dir;
-    document.getElementById('navDist').textContent = km+' كم';
-    document.getElementById('navArr').style.transform = `rotate(${b}deg)`;
-    if (vOn) spk(dir+'، '+km+' كيلومتر');
-    if (rem<30) { stopNav(); tst('🎉 وصلت!'); }
+// ========== أماكن قريبة ==========
+async function searchNearby(category) {
+    if (!userLat || !userLng) {
+        showToast('الرجاء تحديد موقعك أولاً');
+        return;
+    }
+    
+    const categories = {
+        hospital: 'مستشفى',
+        pharmacy: 'صيدلية',
+        restaurant: 'مطعم',
+        fuel: 'محطة وقود',
+        mosque: 'مسجد',
+        cafe: 'مقهى'
+    };
+    
+    try {
+        const res = await fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + categories[category] + '&limit=10&lat=' + userLat + '&lon=' + userLng + '&accept-language=ar');
+        const data = await res.json();
+        
+        map.eachLayer(function(layer) {
+            if (layer._nearby) map.removeLayer(layer);
+        });
+        
+        data.forEach(function(place) {
+            const icon = L.divIcon({
+                className: '',
+                html: '<div style="width:20px;height:20px;background:#4caf50;border-radius:50%;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>',
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            });
+            const marker = L.marker([place.lat, place.lon], { icon }).addTo(map);
+            marker._nearby = true;
+            marker.bindPopup('<b>' + place.display_name + '</b>');
+        });
+        
+        showToast('تم العثور على ' + data.length + ' ' + categories[category]);
+    } catch(e) {
+        showToast('تعذر البحث');
+    }
 }
 
-function stopNav() {
-    nav = false;
-    document.getElementById('navTop').style.display = 'none';
-    navKs.forEach(m => map.removeLayer(m)); navKs = [];
-    if (navL) { map.removeLayer(navL); navL = null; }
+// ========== المفضلة ==========
+function addToFavorites(name, lat, lng) {
+    if (favorites.find(f => f.lat === lat && f.lng === lng)) {
+        showToast('الموقع موجود مسبقاً');
+        return;
+    }
+    favorites.unshift({ name, lat, lng });
+    localStorage.setItem('mapFavs', JSON.stringify(favorites));
+    renderFavorites();
+    showToast('تمت الإضافة للمفضلة ❤️');
 }
 
-function brng(lat1, lng1, lat2, lng2) {
-    const d = (lng2-lng1)*Math.PI/180;
-    const y = Math.sin(d)*Math.cos(lat2*Math.PI/180);
-    const x = Math.cos(lat1*Math.PI/180)*Math.sin(lat2*Math.PI/180)-Math.sin(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.cos(d);
-    return (Math.atan2(y,x)*180/Math.PI+360)%360;
+function renderFavorites() {
+    const container = document.getElementById('favList');
+    if (favorites.length === 0) {
+        container.innerHTML = '<p style="color:#999;text-align:center;">لا توجد أماكن مفضلة</p>';
+        return;
+    }
+    container.innerHTML = favorites.map(function(f, i) {
+        return '<div style="display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #eee;cursor:pointer;" onclick="addMarker(' + f.lat + ',' + f.lng + ')">' +
+               '<span>' + f.name + '</span>' +
+               '<button onclick="event.stopPropagation();removeFav(' + i + ')" style="background:none;border:none;color:red;cursor:pointer;">🗑️</button>' +
+               '</div>';
+    }).join('');
 }
 
-function goTo(lat, lng) {
-    if (!uLat) { tst('انتظر تحديد موقعك'); return; }
-    rS = { lat:uLat, lng:uLng, name:'موقعي' };
-    rE = { lat, lng, name:'الوجهة' };
-    document.getElementById('startInp').value = 'موقعي الحالي';
-    document.getElementById('endInp').value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-    document.getElementById('routePanel').style.display = 'block';
-    calcRt();
+function removeFav(index) {
+    favorites.splice(index, 1);
+    localStorage.setItem('mapFavs', JSON.stringify(favorites));
+    renderFavorites();
 }
 
 // ========== مشاركة ==========
-function share(lat, lng, name) {
-    sLat = lat; sLng = lng; sNam = name || 'موقع';
-    document.getElementById('shTitle').textContent = sNam;
-    document.getElementById('shCoords').textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-    document.getElementById('shareModal').classList.add('show');
+function shareLocation() {
+    if (!userLat || !userLng) {
+        showToast('الرجاء تحديد موقعك أولاً');
+        return;
+    }
+    const text = '📍 موقعي الحالي\n🗺️ ' + userLat.toFixed(5) + ', ' + userLng.toFixed(5) + '\n🔗 https://www.google.com/maps?q=' + userLat + ',' + userLng;
+    const url = 'https://wa.me/?text=' + encodeURIComponent(text);
+    window.open(url, '_blank');
 }
 
-function doShare(p) {
-    if (!sLat) return;
-    const app = `${location.origin}${location.pathname}?lat=${sLat}&lng=${sLng}&name=${encodeURIComponent(sNam)}`;
-    const gm = `https://www.google.com/maps?q=${sLat},${sLng}`;
-    const txt = `📍 ${sNam}\n🗺️ ${sLat.toFixed(5)}, ${sLng.toFixed(5)}\n🔗 ${app}\n🗺️ ${gm}`;
-    const enc = encodeURIComponent(txt);
-    const urls = {
-        whatsapp:`https://wa.me/?text=${enc}`, facebook:`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(app)}`,
-        telegram:`https://t.me/share/url?url=${encodeURIComponent(app)}&text=${enc}`, messenger:`fb-messenger://share/?link=${encodeURIComponent(app)}`,
-        sms:`sms:?body=${enc}`, copy:null
-    };
-    if (p==='copy') navigator.clipboard.writeText(txt).then(() => tst('تم النسخ'));
-    else if (urls[p]) window.open(urls[p], '_blank');
-    document.getElementById('shareModal').classList.remove('show');
+// ========== توست ==========
+function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.style.display = 'block';
+    setTimeout(function() {
+        toast.style.display = 'none';
+    }, 2500);
 }
 
-// ========== مفضلة ==========
-function addFv(name, lat, lng) {
-    if (favs.find(f => f.lat===lat && f.lng===lng)) { tst('موجود مسبقاً'); return; }
-    favs.unshift({ id:Date.now(), name:name||'موقع', lat, lng, date:new Date().toLocaleDateString('ar') });
-    localStorage.setItem('fvs', JSON.stringify(favs));
-    renderFavs(); tst('❤️ تم الحفظ');
-}
-
-function renderFavs() {
-    const h = favs.length ? favs.map(f =>
-        `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px;background:var(--bg3);border-radius:8px;margin-bottom:4px;" onclick="goFv(${f.lat},${f.lng})">
-            <div style="display:flex;align-items:center;gap:6px;"><i class="fas fa-heart" style="color:#ff6b6b;"></i><span style="font-size:13px;">${f.name}</span></div>
-            <button onclick="event.stopPropagation();delFv(${f.id})" style="background:none;border:none;color:#ff6b6b;cursor:pointer;">🗑️</button>
-        </div>`
-    ).join('') : '<p style="color:var(--tx3);text-align:center;">لا توجد مفضلة</p>';
-    document.getElementById('favSide').innerHTML = h;
-    document.getElementById('favList').innerHTML = h;
-}
-
-function goFv(lat, lng) { addMrk(lat, lng); document.getElementById('sidebar').classList.remove('show'); document.getElementById('overlay').classList.remove('show'); }
-function delFv(id) { favs = favs.filter(f => f.id!==id); localStorage.setItem('fvs', JSON.stringify(favs)); renderFavs(); tst('تم الحذف'); }
-
-// ========== أماكن قريبة ==========
-async function nearBy(cat) {
-    if (!uLat) { tst('حدد موقعك أولاً'); return; }
-    const cats = { hospital:'مستشفى', pharmacy:'صيدلية', restaurant:'مطعم', fuel:'محطة وقود' };
-    try {
-        const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${cats[cat]}&limit=8&lat=${uLat}&lon=${uLng}&accept-language=ar`);
-        const d = await r.json();
-        map.eachLayer(l => { if (l._nb) map.removeLayer(l); });
-        d.forEach(p => {
-            const ic = L.divIcon({ className:'custom-marker', html:'<div class="marker-pin" style="background:#51cf66;"></div>', iconSize:[20,30], iconAnchor:[10,30] });
-            const m = L.marker([p.lat, p.lon], { icon:ic }).addTo(map); m._nb = true;
-            m.bindPopup(`<b>${p.display_name}</b>`);
+// ========== تهيئة الأحداث ==========
+function initEvents() {
+    // زر القائمة
+    document.getElementById('menuBtn').addEventListener('click', function() {
+        const panel = document.getElementById('menuPanel');
+        panel.classList.toggle('show');
+        document.getElementById('routePanel').classList.remove('show');
+        document.getElementById('favPanel').classList.remove('show');
+    });
+    
+    // زر تحديد الموقع
+    document.getElementById('locateBtn').addEventListener('click', locateUser);
+    
+    // البحث
+    document.getElementById('searchInput').addEventListener('input', function() {
+        const query = this.value.trim();
+        for (const [name, coords] of Object.entries(cities)) {
+            if (name.includes(query) && query.length > 1) {
+                searchCity(name);
+                break;
+            }
+        }
+    });
+    
+    // الشريط السفلي
+    document.querySelectorAll('.nav-item[data-panel]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            const panel = this.dataset.panel;
+            document.getElementById('menuPanel').classList.remove('show');
+            document.getElementById('routePanel').classList.remove('show');
+            document.getElementById('favPanel').classList.remove('show');
+            
+            if (panel === 'route') document.getElementById('routePanel').classList.add('show');
+            if (panel === 'fav') document.getElementById('favPanel').classList.add('show');
         });
-        tst(`تم العثور على ${d.length} ${cats[cat]}`);
-    } catch { tst('تعذر البحث'); }
+    });
+    
+    // مشاركة
+    document.getElementById('shareNav').addEventListener('click', shareLocation);
+    
+    // وسيلة النقل
+    document.querySelectorAll('.t-tab').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.t-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            navigationMode = this.dataset.mode;
+            if (routeStart && routeEnd) calculateRoute();
+        });
+    });
+    
+    // اختيار من الخريطة
+    document.getElementById('pickOnMap').addEventListener('click', function() {
+        isPickingOnMap = true;
+        this.style.color = '#f44336';
+        showToast('اضغط على الخريطة لتحديد الوجهة');
+    });
+    
+    // بدء الملاحة
+    document.getElementById('startNavBtn').addEventListener('click', function() {
+        if (!routeStart && userLat) {
+            routeStart = { lat: userLat, lng: userLng, name: 'موقعي الحالي' };
+        }
+        startNavigation();
+    });
+    
+    // نقطة الانطلاق - استخدام الموقع الحالي
+    document.getElementById('startInput').addEventListener('focus', function() {
+        if (userLat && userLng) {
+            routeStart = { lat: userLat, lng: userLng, name: 'موقعي الحالي' };
+            this.value = 'موقعي الحالي';
+            if (routeEnd) calculateRoute();
+        }
+    });
 }
 
-// ========== صوت ==========
-function startVoice() {
-    if (!('webkitSpeechRecognition' in window)) { tst('غير مدعوم'); return; }
-    const rec = new webkitSpeechRecognition(); rec.lang = 'ar-SY';
-    document.getElementById('voicePopup').style.display = 'flex';
-    rec.start();
-    rec.onresult = e => {
-        document.getElementById('searchInput').value = e.results[0][0].transcript;
-        document.getElementById('voicePopup').style.display = 'none';
-        schCity(e.results[0][0].transcript);
-    };
-    rec.onerror = () => { document.getElementById('voicePopup').style.display = 'none'; };
-}
-
-function spk(t) {
-    if ('speechSynthesis' in window) {
-        const u = new SpeechSynthesisUtterance(t); u.lang = 'ar-SY'; u.rate = 1.1;
-        speechSynthesis.speak(u);
+// ========== إنشاء قائمة المدن ==========
+function buildCityList() {
+    const container = document.getElementById('cityList');
+    for (const name of Object.keys(cities)) {
+        const btn = document.createElement('button');
+        btn.className = 'city-btn';
+        btn.textContent = name;
+        btn.addEventListener('click', function() { searchCity(name); });
+        container.appendChild(btn);
     }
 }
 
-// ========== مساعدات ==========
-function schCity(n) { const c = cts[n]; if (c) { addMrk(c[0], c[1]); document.getElementById('sidebar').classList.remove('show'); document.getElementById('overlay').classList.remove('show'); } }
-function tst(m) { const t = document.getElementById('toast'); document.getElementById('toastMsg').textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
-
-// ========== أحداث ==========
-function initEvents() {
-    document.getElementById('menuBtn').onclick = () => { document.getElementById('sidebar').classList.add('show'); document.getElementById('overlay').classList.add('show'); };
-    document.getElementById('sideClose').onclick = () => { document.getElementById('sidebar').classList.remove('show'); document.getElementById('overlay').classList.remove('show'); };
-    document.getElementById('overlay').onclick = () => { document.getElementById('sidebar').classList.remove('show'); document.getElementById('overlay').classList.remove('show'); };
-
-    document.getElementById('themeBtn').onclick = () => {
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        document.documentElement.setAttribute('data-theme', isDark?'light':'dark');
-        document.getElementById('themeBtn').innerHTML = isDark ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
-        document.getElementById('dark1').checked = !isDark;
-        document.getElementById('dark2').checked = !isDark;
-        localStorage.setItem('theme', isDark?'light':'dark');
-    };
-
-    document.getElementById('searchInput').oninput = function() {
-        const q = this.value.trim();
-        for (const [n, c] of Object.entries(cts)) { if (n.includes(q)) { schCity(n); break; } }
-    };
-
-    document.querySelectorAll('.ch[data-city]').forEach(b => b.onclick = () => schCity(b.dataset.city));
-    document.querySelectorAll('.ch[data-nearby]').forEach(b => b.onclick = () => nearBy(b.dataset.nearby));
-
-    document.getElementById('zoomIn').onclick = () => map.zoomIn();
-    document.getElementById('zoomOut').onclick = () => map.zoomOut();
-    document.getElementById('locateBtn').onclick = () => { if (uLat) map.setView([uLat, uLng], 16); };
-    document.getElementById('layerBtn').onclick = () => {
-        const p = document.getElementById('layerPopup');
-        p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
-    };
-    document.querySelectorAll('.lp').forEach(b => b.onclick = function() {
-        document.querySelectorAll('.lp').forEach(x => x.classList.remove('active'));
-        this.classList.add('active');
-        map.removeLayer(std); map.removeLayer(sat); map.removeLayer(ter);
-        const l = this.dataset.layer;
-        if (l==='standard') std.addTo(map); else if (l==='satellite') sat.addTo(map); else ter.addTo(map);
-        curL = l; document.getElementById('layerPopup').style.display = 'none';
+// ========== إنشاء قائمة الأماكن القريبة ==========
+function buildNearbyList() {
+    const categories = [
+        { id: 'hospital', name: '🏥 مستشفيات' },
+        { id: 'pharmacy', name: '💊 صيدليات' },
+        { id: 'restaurant', name: '🍽️ مطاعم' },
+        { id: 'fuel', name: '⛽ محطات وقود' },
+        { id: 'mosque', name: '🕌 مساجد' },
+        { id: 'cafe', name: '☕ مقاهي' }
+    ];
+    
+    const container = document.getElementById('nearbyList');
+    categories.forEach(function(cat) {
+        const btn = document.createElement('button');
+        btn.className = 'city-btn';
+        btn.textContent = cat.name;
+        btn.addEventListener('click', function() { searchNearby(cat.id); });
+        container.appendChild(btn);
     });
-
-    document.querySelectorAll('.rpt').forEach(b => b.onclick = function() {
-        document.querySelectorAll('.rpt').forEach(x => x.classList.remove('active'));
-        this.classList.add('active'); navM = this.dataset.mode;
-        if (rS && rE) calcRt();
-    });
-
-    document.getElementById('useCur').onclick = () => {
-        if (uLat) { rS = { lat:uLat, lng:uLng, name:'موقعي' }; document.getElementById('startInp').value = 'موقعي الحالي'; if (rE) calcRt(); }
-    };
-    document.getElementById('pickMap').onclick = function() {
-        this.dataset.on = '1'; this.style.background = 'var(--pr)'; map.getContainer().style.cursor = 'crosshair';
-        tst('اضغط على الخريطة لتحديد الوجهة');
-    };
-    document.getElementById('startNavBtn').onclick = startNav;
-    document.getElementById('navStop').onclick = stopNav;
-
-    document.querySelectorAll('.bn').forEach(b => b.onclick = function() {
-        document.querySelectorAll('.bn').forEach(x => x.classList.remove('active'));
-        this.classList.add('active');
-        const p = this.dataset.panel;
-        document.getElementById('routePanel').style.display = 'none';
-        document.getElementById('favSheet').classList.remove('show');
-        document.getElementById('setSheet').classList.remove('show');
-        if (p === 'route') document.getElementById('routePanel').style.display = 'block';
-    });
-    document.getElementById('bnShare').onclick = () => {
-        if (uLat) share(uLat, uLng, 'موقعي الحالي'); else tst('انتظر تحديد موقعك');
-    };
-    document.getElementById('bnFav').onclick = () => {
-        document.getElementById('routePanel').style.display = 'none';
-        document.getElementById('favSheet').classList.toggle('show');
-        document.getElementById('setSheet').classList.remove('show');
-    };
-    document.getElementById('bnSet').onclick = () => {
-        document.getElementById('routePanel').style.display = 'none';
-        document.getElementById('setSheet').classList.toggle('show');
-        document.getElementById('favSheet').classList.remove('show');
-    };
-
-    document.querySelectorAll('.shb').forEach(b => b.onclick = () => doShare(b.dataset.platform));
-    document.getElementById('shCancel').onclick = () => document.getElementById('shareModal').classList.remove('show');
-    document.getElementById('emCancel').onclick = () => document.getElementById('emModal').classList.remove('show');
-    document.querySelectorAll('.modal-bg').forEach(bg => bg.onclick = function() { this.parentElement.classList.remove('show'); });
-
-    const emH = (type) => {
-        if (!uLat) { tst('حدد موقعك أولاً'); return; }
-        const nums = { police:'112', ambulance:'110', fire:'113' };
-        const txt = `🚨 طوارئ\n📍 ${uLat.toFixed(5)},${uLng.toFixed(5)}\n🔗 ${location.origin}${location.pathname}?lat=${uLat}&lng=${uLng}`;
-        window.open(`tel:${nums[type]}`);
-        setTimeout(() => window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`), 500);
-        document.getElementById('emModal').classList.remove('show');
-    };
-    document.getElementById('emPolice').onclick = () => emH('police');
-    document.getElementById('emAmbulance').onclick = () => emH('ambulance');
-    document.getElementById('emFire').onclick = () => emH('fire');
-
-    document.getElementById('dark1').onchange = function() { document.getElementById('dark2').checked = this.checked; document.getElementById('themeBtn').click(); };
-    document.getElementById('dark2').onchange = function() { document.getElementById('dark1').checked = this.checked; document.getElementById('themeBtn').click(); };
-    document.getElementById('voice1').onchange = function() { vOn = this.checked; document.getElementById('voice2').checked = this.checked; };
-    document.getElementById('voice2').onchange = function() { vOn = this.checked; document.getElementById('voice1').checked = this.checked; };
-    document.getElementById('acc1').onchange = function() { document.getElementById('acc2').checked = this.checked; };
-    document.getElementById('acc2').onchange = function() { document.getElementById('acc1').checked = this.checked; };
-
-    document.getElementById('clearFavs').onclick = () => { favs = []; localStorage.setItem('fvs', '[]'); renderFavs(); tst('تم مسح المفضلة'); };
-    document.getElementById('clearHist').onclick = () => { hist = []; localStorage.setItem('hst', '[]'); tst('تم مسح السجل'); };
-    document.getElementById('voiceBtn').onclick = startVoice;
-
-    // رابط
-    const pr = new URLSearchParams(location.search);
-    const pl = parseFloat(pr.get('lat')), pn = parseFloat(pr.get('lng')), pm = pr.get('name');
-    if (pl && pn) setTimeout(() => {
-        addMrk(pl, pn);
-        tst(`📍 ${pm || 'موقع مشترك'}`);
-        if (uLat && confirm('الانطلاق إلى هذا الموقع؟')) goTo(pl, pn);
-    }, 2000);
-
-    renderFavs();
 }
+
+// ========== بدء التطبيق ==========
+document.addEventListener('DOMContentLoaded', function() {
+    initMap();
+    initEvents();
+    buildCityList();
+    buildNearbyList();
+    renderFavorites();
+    
+    // محاولة تحديد الموقع تلقائياً
+    setTimeout(locateUser, 1000);
+});
