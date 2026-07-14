@@ -2,584 +2,416 @@
 <html lang="ar" dir="rtl" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>خريطة سوريا التفاعلية - ملاحة ومسارات</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#4facfe">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>خريطة سوريا - ملاحة ومسارات</title>
     
-    <!-- الخطوط والأيقونات -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
-    <!-- ملفات الـ CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <!-- شاشة التحميل -->
     <div class="loading-screen" id="loadingScreen">
-        <div class="loader">
-            <div class="loader-icon-wrapper">
-                <i class="fas fa-map-marked-alt loader-icon"></i>
-                <div class="loader-ripple"></div>
-            </div>
-            <h2 class="loader-title">خريطة سوريا</h2>
-            <p class="loader-subtitle">نظام الملاحة والمسارات</p>
-            <div class="loader-progress">
-                <div class="loader-progress-bar"></div>
-            </div>
+        <div class="loader-content">
+            <i class="fas fa-map-marked-alt loader-icon"></i>
+            <h2>خريطة سوريا</h2>
+            <div class="loader-bar"><div class="loader-fill"></div></div>
         </div>
     </div>
 
-    <div class="app-container">
-        <!-- القائمة الجانبية -->
-        <aside class="sidebar" id="sidebar">
-            <!-- زر التحكم بالقائمة -->
-            <button class="sidebar-toggle" id="sidebarToggle">
-                <i class="fas fa-chevron-right"></i>
+    <!-- التطبيق الرئيسي -->
+    <div class="app-wrapper">
+        
+        <!-- ========== رأس التطبيق (للموبايل) ========== -->
+        <header class="mobile-header" id="mobileHeader">
+            <button class="header-btn" id="menuBtn">
+                <i class="fas fa-bars"></i>
             </button>
-
-            <!-- رأس القائمة -->
-            <div class="sidebar-header">
-                <div class="logo-wrapper">
-                    <i class="fas fa-map-marked-alt logo-icon"></i>
-                    <h1 class="logo-title">خريطة سوريا</h1>
-                    <span class="logo-badge">Pro</span>
-                </div>
-                <p class="logo-desc">نظام الملاحة المتكامل</p>
+            <div class="header-title">
+                <i class="fas fa-map-marked-alt"></i>
+                <span>خريطة سوريا</span>
             </div>
-
-            <!-- أزرار التحكم السريع -->
-            <div class="quick-actions">
-                <button class="action-btn" id="themeToggle" title="الوضع الليلي">
+            <div class="header-actions">
+                <button class="header-btn" id="headerThemeBtn">
                     <i class="fas fa-moon"></i>
                 </button>
-                <button class="action-btn" id="fullscreenBtn" title="ملء الشاشة">
-                    <i class="fas fa-expand"></i>
-                </button>
-                <button class="action-btn" id="voiceGuideBtn" title="التوجيه الصوتي">
-                    <i class="fas fa-volume-up"></i>
-                </button>
-                <button class="action-btn" id="emergencyBtn" title="حالة الطوارئ">
+                <button class="header-btn" id="headerEmergencyBtn">
                     <i class="fas fa-exclamation-triangle"></i>
                 </button>
             </div>
+        </header>
 
-            <!-- تبويبات القائمة -->
-            <div class="tabs-nav">
-                <button class="tab-btn active" data-tab="search">
-                    <i class="fas fa-search"></i>
-                    <span>البحث</span>
-                </button>
-                <button class="tab-btn" data-tab="navigation">
-                    <i class="fas fa-route"></i>
-                    <span>الملاحة</span>
-                </button>
-                <button class="tab-btn" data-tab="favorites">
-                    <i class="fas fa-heart"></i>
-                    <span>المفضلة</span>
-                </button>
-                <button class="tab-btn" data-tab="history">
-                    <i class="fas fa-history"></i>
-                    <span>السجل</span>
-                </button>
-            </div>
-
-            <!-- محتوى التبويبات -->
-            <div class="tabs-content">
-                <!-- تبويب البحث -->
-                <div class="tab-panel active" id="tab-search">
-                    <!-- مربع البحث -->
-                    <div class="search-box">
-                        <i class="fas fa-search search-icon"></i>
-                        <input type="text" id="searchInput" placeholder="ابحث عن مدينة، شارع، معلم...">
-                        <button class="voice-search-btn" id="voiceSearchBtn" title="بحث صوتي">
-                            <i class="fas fa-microphone"></i>
-                        </button>
-                    </div>
-                    
-                    <!-- نتائج البحث -->
-                    <div class="search-results" id="searchResults"></div>
-
-                    <!-- المدن الرئيسية -->
-                    <div class="section-block">
-                        <h3 class="section-title">
-                            <i class="fas fa-star"></i>
-                            المدن الرئيسية
-                        </h3>
-                        <div class="cities-grid">
-                            <button class="city-card" data-city="دمشق">
-                                <span class="city-icon">🕌</span>
-                                <span class="city-name">دمشق</span>
-                                <span class="city-info">العاصمة</span>
-                            </button>
-                            <button class="city-card" data-city="حلب">
-                                <span class="city-icon">🏰</span>
-                                <span class="city-name">حلب</span>
-                                <span class="city-info">الشهباء</span>
-                            </button>
-                            <button class="city-card" data-city="حمص">
-                                <span class="city-icon">🕌</span>
-                                <span class="city-name">حمص</span>
-                                <span class="city-info">خالد بن الوليد</span>
-                            </button>
-                            <button class="city-card" data-city="اللاذقية">
-                                <span class="city-icon">🏖️</span>
-                                <span class="city-name">اللاذقية</span>
-                                <span class="city-info">عروس الساحل</span>
-                            </button>
-                            <button class="city-card" data-city="حماة">
-                                <span class="city-icon">⚙️</span>
-                                <span class="city-name">حماة</span>
-                                <span class="city-info">النواعير</span>
-                            </button>
-                            <button class="city-card" data-city="دير الزور">
-                                <span class="city-icon">🌉</span>
-                                <span class="city-name">دير الزور</span>
-                                <span class="city-info">الفرات</span>
-                            </button>
-                            <button class="city-card" data-city="الرقة">
-                                <span class="city-icon">🏛️</span>
-                                <span class="city-name">الرقة</span>
-                                <span class="city-info">الرشيد</span>
-                            </button>
-                            <button class="city-card" data-city="طرطوس">
-                                <span class="city-icon">⚓</span>
-                                <span class="city-name">طرطوس</span>
-                                <span class="city-info">أرواد</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- أماكن قريبة -->
-                    <div class="section-block">
-                        <h3 class="section-title">
-                            <i class="fas fa-location-dot"></i>
-                            أماكن قريبة منك
-                        </h3>
-                        <div class="nearby-grid">
-                            <button class="nearby-btn" data-category="hospital">
-                                <i class="fas fa-hospital"></i>
-                                <span>مستشفيات</span>
-                            </button>
-                            <button class="nearby-btn" data-category="pharmacy">
-                                <i class="fas fa-prescription"></i>
-                                <span>صيدليات</span>
-                            </button>
-                            <button class="nearby-btn" data-category="restaurant">
-                                <i class="fas fa-utensils"></i>
-                                <span>مطاعم</span>
-                            </button>
-                            <button class="nearby-btn" data-category="cafe">
-                                <i class="fas fa-coffee"></i>
-                                <span>مقاهي</span>
-                            </button>
-                            <button class="nearby-btn" data-category="mosque">
-                                <i class="fas fa-mosque"></i>
-                                <span>مساجد</span>
-                            </button>
-                            <button class="nearby-btn" data-category="fuel">
-                                <i class="fas fa-gas-pump"></i>
-                                <span>محطات وقود</span>
-                            </button>
-                            <button class="nearby-btn" data-category="bank">
-                                <i class="fas fa-university"></i>
-                                <span>بنوك</span>
-                            </button>
-                            <button class="nearby-btn" data-category="school">
-                                <i class="fas fa-school"></i>
-                                <span>مدارس</span>
-                            </button>
-                            <button class="nearby-btn" data-category="park">
-                                <i class="fas fa-tree"></i>
-                                <span>حدائق</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- تبويب الملاحة -->
-                <div class="tab-panel" id="tab-navigation">
-                    <div class="navigation-panel">
-                        <!-- اختيار وسيلة النقل -->
-                        <div class="transport-modes">
-                            <button class="transport-btn active" data-mode="driving" id="modeDriving">
-                                <i class="fas fa-car"></i>
-                                <span>قيادة</span>
-                            </button>
-                            <button class="transport-btn" data-mode="walking" id="modeWalking">
-                                <i class="fas fa-walking"></i>
-                                <span>مشي</span>
-                            </button>
-                            <button class="transport-btn" data-mode="bicycling" id="modeBicycling">
-                                <i class="fas fa-bicycle"></i>
-                                <span>دراجة</span>
-                            </button>
-                        </div>
-
-                        <!-- نقاط المسار -->
-                        <div class="route-points">
-                            <div class="point-input">
-                                <div class="point-marker start"></div>
-                                <input type="text" id="startPoint" placeholder="نقطة الانطلاق" value="موقعي الحالي">
-                                <button class="use-current-btn" id="useCurrentStart">
-                                    <i class="fas fa-crosshairs"></i>
-                                </button>
-                            </div>
-                            <button class="swap-points-btn" id="swapPoints">
-                                <i class="fas fa-arrow-down-up-across-line"></i>
-                            </button>
-                            <div class="point-input">
-                                <div class="point-marker end"></div>
-                                <input type="text" id="endPoint" placeholder="الوجهة">
-                                <button class="point-action-btn" id="chooseOnMapBtn">
-                                    <i class="fas fa-map-pin"></i>
-                                </button>
-                            </div>
-                            <button class="add-waypoint-btn" id="addWaypoint">
-                                <i class="fas fa-plus-circle"></i>
-                                إضافة نقطة مرور
-                            </button>
-                        </div>
-
-                        <!-- نقاط المرور الإضافية -->
-                        <div class="waypoints-list" id="waypointsList"></div>
-
-                        <!-- معلومات المسار -->
-                        <div class="route-info" id="routeInfo" style="display: none;">
-                            <div class="route-stats">
-                                <div class="stat-item">
-                                    <i class="fas fa-road"></i>
-                                    <span class="stat-label">المسافة</span>
-                                    <span class="stat-value" id="routeDistance">--</span>
-                                </div>
-                                <div class="stat-item">
-                                    <i class="fas fa-clock"></i>
-                                    <span class="stat-label">الوقت المتوقع</span>
-                                    <span class="stat-value" id="routeDuration">--</span>
-                                </div>
-                                <div class="stat-item">
-                                    <i class="fas fa-tachometer-alt"></i>
-                                    <span class="stat-label">السرعة المتوسطة</span>
-                                    <span class="stat-value" id="routeSpeed">--</span>
-                                </div>
-                            </div>
-                            <div class="route-actions">
-                                <button class="route-btn primary" id="startNavigation">
-                                    <i class="fas fa-play"></i>
-                                    بدء الملاحة
-                                </button>
-                                <button class="route-btn" id="saveRouteBtn">
-                                    <i class="fas fa-save"></i>
-                                    حفظ المسار
-                                </button>
-                                <button class="route-btn" id="shareRouteBtn">
-                                    <i class="fas fa-share-alt"></i>
-                                    مشاركة
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- لوحة الملاحة النشطة -->
-                        <div class="active-navigation" id="activeNavigation" style="display: none;">
-                            <div class="nav-header">
-                                <div class="nav-direction">
-                                    <i class="fas fa-arrow-up" id="navArrow"></i>
-                                    <span id="navInstruction">انطلق شرقاً</span>
-                                </div>
-                                <div class="nav-distance" id="navRemaining">--</div>
-                            </div>
-                            <div class="nav-details">
-                                <div class="nav-detail">
-                                    <span>السرعة</span>
-                                    <strong id="navSpeed">0 كم/س</strong>
-                                </div>
-                                <div class="nav-detail">
-                                    <span>الوقت المتبقي</span>
-                                    <strong id="navTimeRemaining">--</strong>
-                                </div>
-                            </div>
-                            <button class="stop-nav-btn" id="stopNavigation">
-                                <i class="fas fa-stop"></i>
-                                إنهاء الملاحة
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- تبويب المفضلة -->
-                <div class="tab-panel" id="tab-favorites">
-                    <div class="favorites-header">
-                        <h3>الأماكن المفضلة</h3>
-                        <button class="text-btn" id="clearAllFavorites">
-                            <i class="fas fa-trash"></i> مسح الكل
-                        </button>
-                    </div>
-                    <div class="favorites-list" id="favoritesList">
-                        <div class="empty-state">
-                            <i class="fas fa-heart-broken"></i>
-                            <p>لا توجد أماكن مفضلة</p>
-                            <span>اضغط على أي مكان في الخريطة لإضافته</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- تبويب السجل -->
-                <div class="tab-panel" id="tab-history">
-                    <div class="history-header">
-                        <h3>سجل الرحلات</h3>
-                        <button class="text-btn" id="clearHistory">
-                            <i class="fas fa-trash"></i> مسح السجل
-                        </button>
-                    </div>
-                    <div class="history-list" id="historyList">
-                        <div class="empty-state">
-                            <i class="fas fa-history"></i>
-                            <p>لا توجد رحلات سابقة</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- معلومات الموقع الحالي -->
-            <div class="location-panel" id="locationPanel">
-                <div class="location-header">
-                    <i class="fas fa-satellite-dish pulse-icon"></i>
+        <!-- ========== القائمة الجانبية المنزلقة (للموبايل) ========== -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        <aside class="mobile-sidebar" id="mobileSidebar">
+            <div class="sidebar-top">
+                <div class="sidebar-logo">
+                    <i class="fas fa-map-marked-alt"></i>
                     <div>
-                        <h4>موقعك الحالي</h4>
-                        <span id="locationStatus">جاري التحديث...</span>
+                        <h2>خريطة سوريا</h2>
+                        <span>نظام الملاحة المتكامل</span>
                     </div>
                 </div>
-                <div class="coordinates-grid">
-                    <div class="coord-item">
-                        <span class="coord-label">خط العرض</span>
-                        <span class="coord-value" id="latitude">--</span>
-                    </div>
-                    <div class="coord-item">
-                        <span class="coord-label">خط الطول</span>
-                        <span class="coord-value" id="longitude">--</span>
-                    </div>
-                    <div class="coord-item">
-                        <span class="coord-label">السرعة</span>
-                        <span class="coord-value" id="speed">--</span>
-                    </div>
-                    <div class="coord-item">
-                        <span class="coord-label">الدقة</span>
-                        <span class="coord-value" id="accuracy">--</span>
-                    </div>
-                </div>
-                <div class="location-actions">
-                    <button class="locate-btn" id="locateMeBtn">
-                        <i class="fas fa-crosshairs"></i>
-                        <span>تحديد موقعي</span>
-                    </button>
-                    <button class="icon-btn-sm" id="shareMyLocationBtn" title="مشاركة موقعي">
-                        <i class="fas fa-share-alt"></i>
-                    </button>
-                    <button class="icon-btn-sm" id="copyCoordsBtn" title="نسخ الإحداثيات">
-                        <i class="fas fa-copy"></i>
-                    </button>
-                </div>
-            </div>
-        </aside>
-
-        <!-- منطقة الخريطة -->
-        <main class="map-area" id="mapArea">
-            <!-- الخريطة -->
-            <div id="map"></div>
-
-            <!-- أدوات الخريطة -->
-            <div class="map-tools">
-                <!-- التحكم بالتكبير -->
-                <div class="tool-group">
-                    <button class="tool-btn" id="zoomIn" title="تكبير">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                    <button class="tool-btn" id="zoomOut" title="تصغير">
-                        <i class="fas fa-minus"></i>
-                    </button>
-                    <button class="tool-btn" id="compassBtn" title="الشمال">
-                        <i class="fas fa-compass"></i>
-                    </button>
-                </div>
-
-                <!-- طبقات الخريطة -->
-                <div class="tool-group">
-                    <button class="tool-btn layer-btn active" data-layer="standard" title="خريطة قياسية">
-                        <i class="fas fa-map"></i>
-                    </button>
-                    <button class="tool-btn layer-btn" data-layer="satellite" title="قمر صناعي">
-                        <i class="fas fa-satellite"></i>
-                    </button>
-                    <button class="tool-btn layer-btn" data-layer="terrain" title="تضاريس">
-                        <i class="fas fa-mountain"></i>
-                    </button>
-                </div>
-
-                <!-- أدوات القياس والرسم -->
-                <div class="tool-group">
-                    <button class="tool-btn" id="measureDistanceBtn" title="قياس المسافة">
-                        <i class="fas fa-ruler"></i>
-                    </button>
-                    <button class="tool-btn" id="measureAreaBtn" title="قياس المساحة">
-                        <i class="fas fa-draw-polygon"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- بوصلة الخريطة -->
-            <div class="map-compass" id="mapCompass">
-                <div class="compass-ring">
-                    <div class="compass-arrow">N</div>
-                </div>
-            </div>
-
-            <!-- شريط معلومات المسار على الخريطة -->
-            <div class="route-overlay" id="routeOverlay" style="display: none;">
-                <div class="overlay-content">
-                    <div class="overlay-direction">
-                        <i class="fas fa-location-arrow"></i>
-                        <span id="overlayInstruction">انطلق شرقاً</span>
-                    </div>
-                    <div class="overlay-stats">
-                        <span id="overlayDistance">0 كم</span>
-                        <span class="separator">|</span>
-                        <span id="overlayTime">0 دقيقة</span>
-                    </div>
-                </div>
-                <button class="overlay-close" id="closeRouteOverlay">
+                <button class="sidebar-close" id="sidebarClose">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
 
-            <!-- مؤشر التحميل -->
-            <div class="map-spinner" id="mapSpinner" style="display: none;">
-                <i class="fas fa-spinner fa-spin"></i>
+            <div class="sidebar-search">
+                <div class="search-input-wrapper">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="ابحث عن مدينة أو مكان...">
+                    <button class="voice-btn" id="voiceSearchBtn">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                </div>
+                <div class="search-results" id="searchResults"></div>
             </div>
-        </main>
-    </div>
 
-    <!-- مودال المشاركة -->
-    <div class="modal" id="shareModal">
-        <div class="modal-overlay"></div>
-        <div class="modal-dialog">
-            <div class="modal-header">
-                <h3>مشاركة الموقع</h3>
-                <button class="modal-close">&times;</button>
+            <div class="sidebar-section">
+                <h3 class="section-label">المدن الرئيسية</h3>
+                <div class="cities-scroll">
+                    <button class="city-chip" data-city="دمشق">🕌 دمشق</button>
+                    <button class="city-chip" data-city="حلب">🏰 حلب</button>
+                    <button class="city-chip" data-city="حمص">🕌 حمص</button>
+                    <button class="city-chip" data-city="اللاذقية">🏖️ اللاذقية</button>
+                    <button class="city-chip" data-city="حماة">⚙️ حماة</button>
+                    <button class="city-chip" data-city="دير الزور">🌉 دير الزور</button>
+                    <button class="city-chip" data-city="الرقة">🏛️ الرقة</button>
+                    <button class="city-chip" data-city="طرطوس">⚓ طرطوس</button>
+                </div>
             </div>
-            <div class="modal-body">
-                <div class="share-preview">
-                    <div class="share-map-thumb" id="shareMapThumb"></div>
-                    <div class="share-details">
-                        <h4 id="shareTitle">موقعي الحالي</h4>
-                        <p id="shareCoords"></p>
+
+            <div class="sidebar-section">
+                <h3 class="section-label">أماكن قريبة</h3>
+                <div class="nearby-scroll">
+                    <button class="nearby-chip" data-category="hospital">
+                        <i class="fas fa-hospital"></i> مستشفيات
+                    </button>
+                    <button class="nearby-chip" data-category="pharmacy">
+                        <i class="fas fa-prescription"></i> صيدليات
+                    </button>
+                    <button class="nearby-chip" data-category="restaurant">
+                        <i class="fas fa-utensils"></i> مطاعم
+                    </button>
+                    <button class="nearby-chip" data-category="fuel">
+                        <i class="fas fa-gas-pump"></i> وقود
+                    </button>
+                    <button class="nearby-chip" data-category="mosque">
+                        <i class="fas fa-mosque"></i> مساجد
+                    </button>
+                    <button class="nearby-chip" data-category="cafe">
+                        <i class="fas fa-coffee"></i> مقاهي
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="section-label">المفضلة</h3>
+                <div class="favorites-mini" id="favoritesMini">
+                    <p class="empty-text">لا توجد أماكن مفضلة</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ========== منطقة الخريطة ========== -->
+        <main class="map-container" id="mapContainer">
+            <div id="map"></div>
+
+            <!-- أزرار الخريطة العائمة -->
+            <div class="map-floating-btns">
+                <button class="float-btn" id="zoomInFAB" title="تكبير">+</button>
+                <button class="float-btn" id="zoomOutFAB" title="تصغير">−</button>
+                <button class="float-btn" id="locateFAB" title="موقعي">
+                    <i class="fas fa-crosshairs"></i>
+                </button>
+                <button class="float-btn" id="layersFAB" title="الطبقات">
+                    <i class="fas fa-layer-group"></i>
+                </button>
+            </div>
+
+            <!-- محدد الطبقات -->
+            <div class="layers-popup" id="layersPopup" style="display: none;">
+                <button class="layer-option active" data-layer="standard">
+                    <i class="fas fa-map"></i> قياسي
+                </button>
+                <button class="layer-option" data-layer="satellite">
+                    <i class="fas fa-satellite"></i> قمر صناعي
+                </button>
+                <button class="layer-option" data-layer="terrain">
+                    <i class="fas fa-mountain"></i> تضاريس
+                </button>
+            </div>
+
+            <!-- لوحة الملاحة النشطة -->
+            <div class="nav-panel" id="navPanel" style="display: none;">
+                <div class="nav-panel-top">
+                    <div class="nav-direction-icon">
+                        <i class="fas fa-location-arrow" id="navPanelArrow"></i>
+                    </div>
+                    <div class="nav-panel-info">
+                        <div class="nav-panel-instruction" id="navPanelInstruction">اتجه شرقاً</div>
+                        <div class="nav-panel-distance" id="navPanelDistance">1.2 كم</div>
+                    </div>
+                    <button class="nav-panel-close" id="navPanelClose">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="nav-panel-stats">
+                    <div class="nav-stat">
+                        <i class="fas fa-clock"></i>
+                        <span id="navPanelTime">5 دقائق</span>
+                    </div>
+                    <div class="nav-stat">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span id="navPanelSpeed">0 كم/س</span>
                     </div>
                 </div>
-                <div class="share-platforms">
-                    <button class="share-platform-btn whatsapp" data-platform="whatsapp">
+            </div>
+
+            <!-- تنبيه الوصول -->
+            <div class="arrival-alert" id="arrivalAlert" style="display: none;">
+                <i class="fas fa-flag-checkered"></i>
+                <span>لقد وصلت إلى وجهتك! 🎉</span>
+            </div>
+        </main>
+
+        <!-- ========== لوحة المسار السفلية ========== -->
+        <div class="route-panel" id="routePanel" style="display: none;">
+            <div class="route-panel-handle"></div>
+            <div class="route-panel-content">
+                <div class="transport-selector">
+                    <button class="transport-option active" data-mode="driving">
+                        <i class="fas fa-car"></i>
+                        <span>سيارة</span>
+                    </button>
+                    <button class="transport-option" data-mode="walking">
+                        <i class="fas fa-walking"></i>
+                        <span>مشي</span>
+                    </button>
+                    <button class="transport-option" data-mode="bicycling">
+                        <i class="fas fa-bicycle"></i>
+                        <span>دراجة</span>
+                    </button>
+                </div>
+
+                <div class="route-inputs">
+                    <div class="route-input-row">
+                        <div class="route-dot start"></div>
+                        <input type="text" id="startPointMobile" placeholder="نقطة الانطلاق" value="موقعي الحالي">
+                        <button class="route-input-btn" id="useCurrentStartMobile">
+                            <i class="fas fa-crosshairs"></i>
+                        </button>
+                    </div>
+                    <button class="swap-btn" id="swapPointsMobile">
+                        <i class="fas fa-arrow-up"></i>
+                    </button>
+                    <div class="route-input-row">
+                        <div class="route-dot end"></div>
+                        <input type="text" id="endPointMobile" placeholder="اختر الوجهة...">
+                        <button class="route-input-btn" id="chooseOnMapMobile">
+                            <i class="fas fa-map-pin"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="route-result" id="routeResultMobile" style="display: none;">
+                    <div class="route-result-stats">
+                        <div class="result-stat">
+                            <i class="fas fa-road"></i>
+                            <span id="routeDistMobile">--</span>
+                        </div>
+                        <div class="result-stat">
+                            <i class="fas fa-clock"></i>
+                            <span id="routeTimeMobile">--</span>
+                        </div>
+                    </div>
+                    <div class="route-result-actions">
+                        <button class="btn-start-nav" id="startNavMobile">
+                            <i class="fas fa-play"></i> بدء الملاحة
+                        </button>
+                        <button class="btn-share-route" id="shareRouteMobile">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== شريط التنقل السفلي ========== -->
+        <nav class="bottom-nav" id="bottomNav">
+            <button class="nav-item active" data-panel="map">
+                <i class="fas fa-map"></i>
+                <span>الخريطة</span>
+            </button>
+            <button class="nav-item" data-panel="route">
+                <i class="fas fa-route"></i>
+                <span>المسار</span>
+            </button>
+            <button class="nav-item" id="bottomNavShare">
+                <i class="fas fa-share-alt"></i>
+                <span>مشاركة</span>
+            </button>
+            <button class="nav-item" data-panel="favorites">
+                <i class="fas fa-heart"></i>
+                <span>المفضلة</span>
+            </button>
+            <button class="nav-item" data-panel="settings">
+                <i class="fas fa-cog"></i>
+                <span>الإعدادات</span>
+            </button>
+        </nav>
+
+        <!-- ========== لوحة المفضلة السفلية ========== -->
+        <div class="bottom-panel" id="favoritesPanel">
+            <div class="panel-handle"></div>
+            <div class="panel-header">
+                <h3>الأماكن المفضلة</h3>
+                <button class="text-btn" id="clearFavoritesMobile">مسح الكل</button>
+            </div>
+            <div class="panel-body" id="favoritesPanelList">
+                <p class="empty-text">لا توجد أماكن مفضلة</p>
+            </div>
+        </div>
+
+        <!-- ========== لوحة الإعدادات السفلية ========== -->
+        <div class="bottom-panel" id="settingsPanel">
+            <div class="panel-handle"></div>
+            <div class="panel-header">
+                <h3>الإعدادات</h3>
+            </div>
+            <div class="panel-body">
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-moon"></i>
+                        <span>الوضع الليلي</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="themeToggleMobile">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-volume-up"></i>
+                        <span>التوجيه الصوتي</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="voiceGuideToggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-bullseye"></i>
+                        <span>دقة عالية للموقع</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="highAccuracyToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <span>وحدة القياس</span>
+                    <select class="setting-select" id="unitSelect">
+                        <option value="km">كيلومتر</option>
+                        <option value="mile">ميل</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <span>سجل الرحلات</span>
+                    <button class="text-btn" id="clearHistoryMobile">مسح السجل</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== مودال المشاركة ========== -->
+        <div class="modal" id="shareModal">
+            <div class="modal-backdrop"></div>
+            <div class="modal-sheet">
+                <div class="modal-handle"></div>
+                <h3>مشاركة الموقع</h3>
+                <div class="share-location-preview">
+                    <div class="share-loc-icon">
+                        <i class="fas fa-map-pin"></i>
+                    </div>
+                    <div>
+                        <strong id="shareModalTitle">موقعي الحالي</strong>
+                        <p id="shareModalCoords">33.5138, 36.2765</p>
+                    </div>
+                </div>
+                <div class="share-grid">
+                    <button class="share-option whatsapp" data-platform="whatsapp">
                         <i class="fab fa-whatsapp"></i>
                         <span>واتساب</span>
                     </button>
-                    <button class="share-platform-btn facebook" data-platform="facebook">
+                    <button class="share-option facebook" data-platform="facebook">
                         <i class="fab fa-facebook"></i>
                         <span>فيسبوك</span>
                     </button>
-                    <button class="share-platform-btn telegram" data-platform="telegram">
+                    <button class="share-option telegram" data-platform="telegram">
                         <i class="fab fa-telegram"></i>
                         <span>تيليجرام</span>
                     </button>
-                    <button class="share-platform-btn messenger" data-platform="messenger">
+                    <button class="share-option messenger" data-platform="messenger">
                         <i class="fab fa-facebook-messenger"></i>
                         <span>ماسنجر</span>
                     </button>
-                    <button class="share-platform-btn sms" data-platform="sms">
+                    <button class="share-option sms" data-platform="sms">
                         <i class="fas fa-sms"></i>
-                        <span>رسالة SMS</span>
+                        <span>رسالة</span>
                     </button>
-                    <button class="share-platform-btn copy" data-platform="copy">
-                        <i class="fas fa-link"></i>
-                        <span>نسخ الرابط</span>
+                    <button class="share-option copy" data-platform="copy">
+                        <i class="fas fa-copy"></i>
+                        <span>نسخ</span>
                     </button>
                 </div>
-                <div class="share-link-section">
-                    <label>رابط المشاركة:</label>
-                    <div class="link-input-group">
-                        <input type="text" id="shareLink" readonly>
-                        <button id="copyShareLink">نسخ</button>
-                    </div>
-                </div>
+                <button class="modal-cancel" id="shareModalCancel">إلغاء</button>
             </div>
         </div>
-    </div>
 
-    <!-- مودال الطوارئ -->
-    <div class="modal" id="emergencyModal">
-        <div class="modal-overlay"></div>
-        <div class="modal-dialog">
-            <div class="modal-header emergency-header">
-                <h3><i class="fas fa-exclamation-triangle"></i> حالة طوارئ</h3>
-                <button class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p class="emergency-text">سيتم مشاركة موقعك الحالي مع جهات الطوارئ</p>
-                <div class="emergency-actions">
-                    <button class="emergency-btn police" id="emergencyPolice">
-                        <i class="fas fa-shield-alt"></i> شرطة
+        <!-- ========== مودال الطوارئ ========== -->
+        <div class="modal" id="emergencyModal">
+            <div class="modal-backdrop"></div>
+            <div class="modal-sheet">
+                <div class="modal-handle"></div>
+                <h3><i class="fas fa-exclamation-triangle" style="color: #ff6b6b;"></i> حالة طوارئ</h3>
+                <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;">
+                    سيتم مشاركة موقعك مع جهات الطوارئ
+                </p>
+                <div class="emergency-grid">
+                    <button class="emergency-option police" id="emergencyPoliceMobile">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>شرطة 112</span>
                     </button>
-                    <button class="emergency-btn ambulance" id="emergencyAmbulance">
-                        <i class="fas fa-ambulance"></i> إسعاف
+                    <button class="emergency-option ambulance" id="emergencyAmbulanceMobile">
+                        <i class="fas fa-ambulance"></i>
+                        <span>إسعاف 110</span>
                     </button>
-                    <button class="emergency-btn fire" id="emergencyFire">
-                        <i class="fas fa-fire-extinguisher"></i> إطفاء
+                    <button class="emergency-option fire" id="emergencyFireMobile">
+                        <i class="fas fa-fire-extinguisher"></i>
+                        <span>إطفاء 113</span>
                     </button>
                 </div>
-                <div class="emergency-contacts">
-                    <p>أرقام الطوارئ في سوريا:</p>
-                    <ul>
-                        <li>الشرطة: 112</li>
-                        <li>الإسعاف: 110</li>
-                        <li>الإطفاء: 113</li>
-                    </ul>
-                </div>
+                <button class="modal-cancel" id="emergencyModalCancel">إلغاء</button>
             </div>
         </div>
-    </div>
 
-    <!-- مودال حفظ المسار -->
-    <div class="modal" id="saveRouteModal">
-        <div class="modal-overlay"></div>
-        <div class="modal-dialog">
-            <div class="modal-header">
-                <h3>حفظ المسار</h3>
-                <button class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>اسم المسار:</label>
-                    <input type="text" id="routeName" placeholder="مثال: الطريق إلى العمل">
-                </div>
-                <div class="route-summary">
-                    <p><strong>من:</strong> <span id="saveRouteFrom"></span></p>
-                    <p><strong>إلى:</strong> <span id="saveRouteTo"></span></p>
-                    <p><strong>المسافة:</strong> <span id="saveRouteDistance"></span></p>
-                </div>
-                <button class="btn-primary full-width" id="confirmSaveRoute">
-                    <i class="fas fa-save"></i> حفظ
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- تنبيهات التوست -->
-    <div class="toast-container" id="toastContainer">
+        <!-- ========== تنبيه التوست ========== -->
         <div class="toast" id="toast">
-            <i class="fas fa-check-circle toast-icon"></i>
-            <span class="toast-message" id="toastMessage"></span>
+            <i class="fas fa-check-circle"></i>
+            <span id="toastMsg">تم بنجاح</span>
         </div>
-    </div>
 
-    <!-- الميكروفون المنبثق -->
-    <div class="voice-overlay" id="voiceOverlay" style="display: none;">
-        <div class="voice-pulse"></div>
-        <i class="fas fa-microphone voice-icon"></i>
-        <p>تحدث الآن...</p>
+        <!-- ========== طبقة الصوت ========== -->
+        <div class="voice-overlay" id="voiceOverlay" style="display: none;">
+            <div class="voice-pulse-ring"></div>
+            <i class="fas fa-microphone voice-mic-icon"></i>
+            <p>تحدث الآن...</p>
+        </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
