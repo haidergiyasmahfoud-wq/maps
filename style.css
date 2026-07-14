@@ -1,0 +1,1679 @@
+/* ==================== المتغيرات العامة ==================== */
+:root {
+    /* ألوان الوضع النهاري */
+    --primary: #4facfe;
+    --primary-dark: #3d8fd9;
+    --secondary: #8b5cf6;
+    --accent: #06d6a0;
+    --danger: #ff6b6b;
+    --warning: #ffd43b;
+    --success: #51cf66;
+    --info: #339af0;
+    
+    --gradient-primary: linear-gradient(135deg, #4facfe, #8b5cf6);
+    --gradient-secondary: linear-gradient(135deg, #06d6a0, #4facfe);
+    --gradient-danger: linear-gradient(135deg, #ff6b6b, #ff8787);
+    
+    --bg-main: #0f1a2e;
+    --bg-sidebar: rgba(15, 26, 46, 0.97);
+    --bg-card: rgba(255, 255, 255, 0.04);
+    --bg-card-hover: rgba(255, 255, 255, 0.08);
+    --bg-input: rgba(255, 255, 255, 0.06);
+    
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    
+    --border: rgba(100, 180, 255, 0.15);
+    --border-hover: rgba(100, 180, 255, 0.4);
+    --border-active: rgba(100, 180, 255, 0.6);
+    
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 8px 25px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 15px 40px rgba(0, 0, 0, 0.5);
+    --shadow-glow: 0 0 20px rgba(79, 172, 254, 0.3);
+    --shadow-glow-strong: 0 0 30px rgba(79, 172, 254, 0.5);
+    
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: 0.15s ease;
+    --transition-smooth: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* الوضع الليلي */
+[data-theme="dark"] {
+    --bg-main: #070d19;
+    --bg-sidebar: rgba(7, 13, 25, 0.98);
+    --bg-card: rgba(255, 255, 255, 0.02);
+    --bg-card-hover: rgba(255, 255, 255, 0.05);
+    --bg-input: rgba(255, 255, 255, 0.03);
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --border: rgba(100, 180, 255, 0.1);
+}
+
+/* ==================== إعادة تعيين ==================== */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg-main);
+    height: 100vh;
+    overflow: hidden;
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==================== شاشة التحميل ==================== */
+.loading-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-sidebar);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100000;
+    transition: opacity 0.5s, visibility 0.5s;
+    backdrop-filter: blur(10px);
+}
+
+.loading-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.loader {
+    text-align: center;
+}
+
+.loader-icon-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+.loader-icon {
+    font-size: 70px;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: loaderBounce 2s ease-in-out infinite;
+    position: relative;
+    z-index: 1;
+}
+
+.loader-ripple {
+    position: absolute;
+    inset: -20px;
+    border-radius: 50%;
+    border: 2px solid rgba(79, 172, 254, 0.3);
+    animation: ripple 2s ease-out infinite;
+}
+
+@keyframes loaderBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-25px); }
+}
+
+@keyframes ripple {
+    0% { transform: scale(0.8); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+.loader-title {
+    font-size: 28px;
+    font-weight: 700;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 5px;
+}
+
+.loader-subtitle {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 25px;
+}
+
+.loader-progress {
+    width: 250px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.loader-progress-bar {
+    height: 100%;
+    background: var(--gradient-primary);
+    border-radius: 10px;
+    animation: progressAnim 2s ease forwards;
+}
+
+@keyframes progressAnim {
+    0% { width: 0%; }
+    100% { width: 100%; }
+}
+
+/* ==================== الحاوية الرئيسية ==================== */
+.app-container {
+    display: flex;
+    height: 100vh;
+    position: relative;
+}
+
+/* ==================== القائمة الجانبية ==================== */
+.sidebar {
+    width: 420px;
+    min-width: 420px;
+    background: var(--bg-sidebar);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border-right: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    transition: all var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+.sidebar.collapsed {
+    width: 0;
+    min-width: 0;
+    border-right: none;
+    opacity: 0;
+}
+
+.sidebar-toggle {
+    position: absolute;
+    right: -18px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--border-active);
+    background: var(--bg-sidebar);
+    color: var(--primary);
+    cursor: pointer;
+    z-index: 1001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+    backdrop-filter: blur(10px);
+}
+
+.sidebar-toggle:hover {
+    background: var(--primary);
+    color: white;
+    box-shadow: var(--shadow-glow-strong);
+}
+
+.sidebar.collapsed .sidebar-toggle {
+    right: -50px;
+}
+
+.sidebar.collapsed .sidebar-toggle i {
+    transform: rotate(180deg);
+}
+
+/* ==================== رأس القائمة ==================== */
+.sidebar-header {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+}
+
+.logo-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.logo-icon {
+    font-size: 42px;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 15px rgba(79, 172, 254, 0.5));
+}
+
+.logo-title {
+    font-size: 24px;
+    font-weight: 800;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-top: 5px;
+}
+
+.logo-badge {
+    position: absolute;
+    top: -5px;
+    right: -25px;
+    background: var(--gradient-danger);
+    color: white;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 700;
+}
+
+.logo-desc {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+/* ==================== أزرار التحكم السريع ==================== */
+.quick-actions {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.action-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    position: relative;
+}
+
+.action-btn:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-active);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+    color: var(--primary);
+}
+
+.action-btn:active {
+    transform: scale(0.95);
+}
+
+/* ==================== التبويبات ==================== */
+.tabs-nav {
+    display: flex;
+    gap: 4px;
+    padding: 8px 12px;
+    background: var(--bg-card);
+    margin: 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 10px 6px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition);
+    font-size: 12px;
+    font-family: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.tab-btn i {
+    font-size: 16px;
+}
+
+.tab-btn.active {
+    background: var(--gradient-primary);
+    color: white;
+    box-shadow: var(--shadow-glow);
+}
+
+.tab-btn:hover:not(.active) {
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+}
+
+.tabs-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 12px;
+}
+
+.tabs-content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.tabs-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.tabs-content::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 10px;
+}
+
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+/* ==================== مربع البحث ==================== */
+.search-box {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.search-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--primary);
+    font-size: 16px;
+    z-index: 1;
+}
+
+#searchInput {
+    width: 100%;
+    padding: 14px 45px 14px 40px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: all var(--transition);
+    font-family: inherit;
+}
+
+#searchInput::placeholder {
+    color: var(--text-muted);
+}
+
+#searchInput:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: var(--shadow-glow);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.voice-search-btn {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--gradient-primary);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+}
+
+.voice-search-btn:hover {
+    box-shadow: var(--shadow-glow-strong);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.search-results {
+    background: var(--bg-sidebar);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    max-height: 250px;
+    overflow-y: auto;
+    margin-top: -8px;
+    margin-bottom: 15px;
+    box-shadow: var(--shadow-md);
+    display: none;
+}
+
+.search-results.active {
+    display: block;
+}
+
+/* ==================== أقسام المحتوى ==================== */
+.section-block {
+    margin-bottom: 20px;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+}
+
+.section-title i {
+    color: var(--primary);
+}
+
+/* ==================== بطاقات المدن ==================== */
+.cities-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.city-card {
+    padding: 14px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    cursor: pointer;
+    transition: all var(--transition);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    font-family: inherit;
+    color: var(--text-primary);
+    position: relative;
+    overflow: hidden;
+}
+
+.city-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--gradient-primary);
+    transform: scaleX(0);
+    transition: transform var(--transition);
+}
+
+.city-card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-active);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-glow);
+}
+
+.city-card:hover::before {
+    transform: scaleX(1);
+}
+
+.city-icon {
+    font-size: 28px;
+}
+
+.city-name {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.city-info {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* ==================== أماكن قريبة ==================== */
+.nearby-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.nearby-btn {
+    padding: 12px 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition);
+    font-size: 12px;
+    font-family: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+}
+
+.nearby-btn i {
+    font-size: 20px;
+    color: var(--primary);
+    transition: all var(--transition);
+}
+
+.nearby-btn:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    color: var(--text-primary);
+}
+
+.nearby-btn:hover i {
+    transform: scale(1.2);
+}
+
+/* ==================== لوحة الملاحة ==================== */
+.navigation-panel {
+    padding: 5px 0;
+}
+
+.transport-modes {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 5px;
+}
+
+.transport-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition);
+    font-family: inherit;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.transport-btn i {
+    font-size: 20px;
+}
+
+.transport-btn.active {
+    background: var(--gradient-primary);
+    color: white;
+    box-shadow: var(--shadow-glow);
+}
+
+.route-points {
+    margin-bottom: 15px;
+}
+
+.point-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    transition: all var(--transition);
+}
+
+.point-input:focus-within {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-glow);
+}
+
+.point-marker {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.point-marker.start {
+    background: var(--success);
+    box-shadow: 0 0 10px rgba(81, 207, 102, 0.5);
+}
+
+.point-marker.end {
+    background: var(--danger);
+    box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+}
+
+.point-input input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 13px;
+    font-family: inherit;
+}
+
+.point-input input:focus {
+    outline: none;
+}
+
+.point-input input::placeholder {
+    color: var(--text-muted);
+}
+
+.use-current-btn,
+.point-action-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    color: var(--primary);
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+    flex-shrink: 0;
+}
+
+.use-current-btn:hover,
+.point-action-btn:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.swap-points-btn {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 5px;
+    background: transparent;
+    border: none;
+    color: var(--primary);
+    cursor: pointer;
+    font-size: 16px;
+    transition: all var(--transition);
+}
+
+.swap-points-btn:hover {
+    transform: rotate(180deg);
+    color: var(--secondary);
+}
+
+.add-waypoint-btn {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    transition: all var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.add-waypoint-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+/* معلومات المسار */
+.route-info {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 15px;
+    margin-top: 15px;
+}
+
+.route-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-md);
+}
+
+.stat-item i {
+    font-size: 20px;
+    color: var(--primary);
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    display: block;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 3px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.route-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.route-btn {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--transition);
+    font-family: inherit;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.route-btn.primary {
+    background: var(--gradient-primary);
+    border: none;
+    color: white;
+    font-weight: 600;
+    flex: 2;
+}
+
+.route-btn:hover {
+    border-color: var(--primary);
+    background: var(--bg-card-hover);
+}
+
+.route-btn.primary:hover {
+    box-shadow: var(--shadow-glow-strong);
+    transform: translateY(-2px);
+}
+
+/* الملاحة النشطة */
+.active-navigation {
+    background: var(--gradient-primary);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-top: 15px;
+    color: white;
+}
+
+.nav-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.nav-direction {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-direction i {
+    font-size: 24px;
+    animation: navPulse 1s infinite;
+}
+
+@keyframes navPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+.nav-distance {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.nav-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.nav-detail {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 10px;
+    border-radius: var(--radius-md);
+    text-align: center;
+}
+
+.nav-detail span {
+    display: block;
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+.nav-detail strong {
+    font-size: 18px;
+}
+
+.stop-nav-btn {
+    width: 100%;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: var(--radius-md);
+    color: white;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    transition: all var(--transition);
+}
+
+.stop-nav-btn:hover {
+    background: rgba(255, 0, 0, 0.5);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* ==================== المفضلة والسجل ==================== */
+.favorites-header,
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.favorites-header h3,
+.history-header h3 {
+    font-size: 15px;
+}
+
+.text-btn {
+    background: transparent;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all var(--transition);
+}
+
+.text-btn:hover {
+    color: #ff4444;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+}
+
+.empty-state i {
+    font-size: 50px;
+    margin-bottom: 15px;
+    opacity: 0.4;
+}
+
+.empty-state span {
+    font-size: 12px;
+    display: block;
+    margin-top: 5px;
+}
+
+/* ==================== لوحة الموقع ==================== */
+.location-panel {
+    padding: 15px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-card);
+    margin-top: auto;
+}
+
+.location-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.location-header i {
+    font-size: 24px;
+    color: var(--primary);
+}
+
+.pulse-icon {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.15); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.location-header h4 {
+    font-size: 14px;
+}
+
+#locationStatus {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.coordinates-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.coord-item {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 10px;
+    border-radius: var(--radius-sm);
+    text-align: center;
+    border: 1px solid var(--border);
+}
+
+.coord-label {
+    display: block;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.coord-value {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.location-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.locate-btn {
+    flex: 1;
+    padding: 10px;
+    background: var(--gradient-primary);
+    border: none;
+    border-radius: var(--radius-md);
+    color: white;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-family: inherit;
+    font-weight: 600;
+}
+
+.locate-btn:hover {
+    box-shadow: var(--shadow-glow-strong);
+    transform: translateY(-2px);
+}
+
+.icon-btn-sm {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+}
+
+.icon-btn-sm:hover {
+    border-color: var(--primary);
+    background: var(--bg-card-hover);
+}
+
+/* ==================== منطقة الخريطة ==================== */
+.map-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* أدوات الخريطة */
+.map-tools {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tool-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: rgba(15, 26, 46, 0.9);
+    backdrop-filter: blur(15px);
+    border-radius: var(--radius-md);
+    padding: 4px;
+    border: 1px solid var(--border);
+}
+
+.tool-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.tool-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--primary);
+}
+
+.tool-btn.active {
+    background: var(--primary);
+    color: white;
+}
+
+/* بوصلة */
+.map-compass {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 1000;
+    width: 50px;
+    height: 50px;
+    background: rgba(15, 26, 46, 0.9);
+    backdrop-filter: blur(15px);
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.compass-arrow {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+/* شريط معلومات المسار */
+.route-overlay {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: var(--gradient-primary);
+    border-radius: var(--radius-xl);
+    padding: 12px 20px;
+    color: white;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.overlay-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.overlay-direction {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.overlay-direction i {
+    font-size: 18px;
+}
+
+.overlay-stats {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+}
+
+.overlay-stats .separator {
+    opacity: 0.5;
+}
+
+.overlay-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* مؤشر التحميل */
+.map-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 30px;
+    color: var(--primary);
+    z-index: 1000;
+}
+
+/* ==================== المودالات ==================== */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+}
+
+.modal-dialog {
+    position: relative;
+    background: var(--bg-sidebar);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 25px;
+    width: 90%;
+    max-width: 480px;
+    margin: auto;
+    box-shadow: var(--shadow-lg);
+    z-index: 1;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-header h3 {
+    font-size: 18px;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 24px;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.modal-close:hover {
+    color: var(--danger);
+}
+
+/* مودال المشاركة */
+.share-preview {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 15px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.share-map-thumb {
+    width: 80px;
+    height: 80px;
+    background: var(--gradient-primary);
+    border-radius: var(--radius-md);
+    flex-shrink: 0;
+}
+
+.share-details h4 {
+    margin-bottom: 5px;
+}
+
+.share-details p {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.share-platforms {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.share-platform-btn {
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--transition);
+    font-family: inherit;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.share-platform-btn i {
+    font-size: 22px;
+}
+
+.share-platform-btn.whatsapp:hover { background: #25D366; border-color: #25D366; color: white; }
+.share-platform-btn.facebook:hover { background: #1877F2; border-color: #1877F2; color: white; }
+.share-platform-btn.telegram:hover { background: #0088cc; border-color: #0088cc; color: white; }
+.share-platform-btn.messenger:hover { background: #00B2FF; border-color: #00B2FF; color: white; }
+.share-platform-btn.sms:hover { background: #34b759; border-color: #34b759; color: white; }
+.share-platform-btn.copy:hover { background: var(--secondary); border-color: var(--secondary); color: white; }
+
+.share-link-section label {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+}
+
+.link-input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.link-input-group input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 13px;
+    direction: ltr;
+}
+
+.link-input-group button {
+    padding: 10px 20px;
+    background: var(--gradient-primary);
+    border: none;
+    border-radius: var(--radius-md);
+    color: white;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    transition: all var(--transition);
+}
+
+.link-input-group button:hover {
+    box-shadow: var(--shadow-glow);
+}
+
+/* مودال الطوارئ */
+.emergency-header h3 {
+    color: var(--danger);
+}
+
+.emergency-text {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+}
+
+.emergency-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.emergency-btn {
+    padding: 15px 10px;
+    border: none;
+    border-radius: var(--radius-md);
+    color: white;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: all var(--transition);
+}
+
+.emergency-btn.police { background: #339af0; }
+.emergency-btn.ambulance { background: #ff6b6b; }
+.emergency-btn.fire { background: #ff922b; }
+
+.emergency-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.emergency-contacts {
+    background: var(--bg-card);
+    padding: 15px;
+    border-radius: var(--radius-md);
+}
+
+.emergency-contacts p {
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.emergency-contacts ul {
+    list-style: none;
+    padding: 0;
+}
+
+.emergency-contacts li {
+    padding: 5px 0;
+    font-size: 14px;
+}
+
+/* مودال حفظ المسار */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-family: inherit;
+}
+
+.route-summary {
+    background: var(--bg-card);
+    padding: 12px;
+    border-radius: var(--radius-md);
+    margin-bottom: 15px;
+    font-size: 13px;
+}
+
+.route-summary p {
+    margin-bottom: 5px;
+}
+
+.btn-primary {
+    padding: 12px;
+    background: var(--gradient-primary);
+    border: none;
+    border-radius: var(--radius-md);
+    color: white;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    transition: all var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-primary:hover {
+    box-shadow: var(--shadow-glow-strong);
+}
+
+.full-width {
+    width: 100%;
+}
+
+/* ==================== التوست ==================== */
+.toast-container {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100001;
+}
+
+.toast {
+    background: var(--bg-sidebar);
+    border: 1px solid var(--border-active);
+    border-radius: var(--radius-xl);
+    padding: 12px 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(20px);
+    transform: translateY(120px);
+    opacity: 0;
+    transition: all var(--transition-smooth);
+}
+
+.toast.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.toast-icon {
+    color: var(--success);
+    font-size: 20px;
+}
+
+/* ==================== طبقة الصوت ==================== */
+.voice-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100000;
+    color: white;
+}
+
+.voice-pulse {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: var(--gradient-primary);
+    animation: voicePulse 1.5s infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes voicePulse {
+    0% { transform: scale(0.8); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+.voice-icon {
+    font-size: 50px;
+    position: absolute;
+    color: white;
+}
+
+/* ==================== ماركر الخريطة ==================== */
+.custom-marker {
+    background: transparent !important;
+    border: none !important;
+}
+
+.marker-pin {
+    width: 28px;
+    height: 28px;
+    border-radius: 50% 50% 50% 0;
+    background: var(--primary);
+    position: absolute;
+    transform: rotate(-45deg);
+    left: 50%;
+    top: 50%;
+    margin: -18px 0 0 -14px;
+    box-shadow: 0 0 15px rgba(79, 172, 254, 0.6);
+}
+
+.marker-pin::after {
+    content: '';
+    width: 12px;
+    height: 12px;
+    margin: 8px 0 0 8px;
+    background: white;
+    position: absolute;
+    border-radius: 50%;
+}
+
+.marker-pin.user {
+    background: var(--danger);
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.7);
+}
+
+.marker-pin.navigation {
+    background: var(--success);
+    box-shadow: 0 0 20px rgba(81, 207, 102, 0.7);
+    animation: navMarkerPulse 1s infinite;
+}
+
+@keyframes navMarkerPulse {
+    0%, 100% { box-shadow: 0 0 10px rgba(81, 207, 102, 0.5); }
+    50% { box-shadow: 0 0 30px rgba(81, 207, 102, 0.9); }
+}
+
+/* ==================== تجاوب ==================== */
+@media (max-width: 768px) {
+    .app-container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        min-width: 100%;
+        max-height: 45vh;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        border-radius: 0 0 20px 20px;
+    }
+
+    .sidebar.collapsed {
+        max-height: 0;
+        min-width: 100%;
+    }
+
+    .sidebar-toggle {
+        right: 50%;
+        top: auto;
+        bottom: -18px;
+        transform: translateX(50%);
+    }
+
+    .map-area {
+        height: 55vh;
+    }
+
+    .cities-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .nearby-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .cities-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .nearby-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
