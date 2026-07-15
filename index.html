@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>خريطة سوريا - محدد المواقع</title>
+    <title>خريطة سوريا 3D - محدد المواقع المتقدم</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="style.css">
@@ -13,9 +13,39 @@
         <!-- الشريط الجانبي -->
         <div class="sidebar">
             <div class="logo-section">
-                <i class="fas fa-map-marked-alt logo-icon"></i>
-                <h1 class="logo-text">خريطة سوريا</h1>
-                <p class="logo-subtitle">محدد المواقع الجغرافي</p>
+                <i class="fas fa-globe-americas logo-icon"></i>
+                <h1 class="logo-text">خريطة سوريا 3D</h1>
+                <p class="logo-subtitle">محدد المواقع ثلاثي الأبعاد</p>
+            </div>
+
+            <!-- أدوات التحكم ثلاثية الأبعاد -->
+            <div class="controls-3d">
+                <div class="control-header">
+                    <i class="fas fa-cube"></i>
+                    <h3>التحكم ثلاثي الأبعاد</h3>
+                </div>
+                <div class="view-buttons">
+                    <button class="view-btn active" data-view="3d">
+                        <i class="fas fa-cube"></i> 3D
+                    </button>
+                    <button class="view-btn" data-view="2d">
+                        <i class="fas fa-map"></i> 2D
+                    </button>
+                </div>
+                <div class="rotation-buttons">
+                    <button class="rotate-btn" id="rotateLeft">
+                        <i class="fas fa-undo"></i> يسار
+                    </button>
+                    <button class="rotate-btn" id="rotateRight">
+                        <i class="fas fa-redo"></i> يمين
+                    </button>
+                    <button class="rotate-btn" id="rotateNorth">
+                        <i class="fas fa-compass"></i> شمال
+                    </button>
+                    <button class="rotate-btn" id="tiltUp">
+                        <i class="fas fa-arrow-up"></i> إمالة
+                    </button>
+                </div>
             </div>
 
             <div class="search-section">
@@ -45,6 +75,59 @@
                 </div>
             </div>
 
+            <!-- قسم التنقل والمسارات -->
+            <div class="navigation-section">
+                <div class="nav-header">
+                    <i class="fas fa-route"></i>
+                    <h3>التنقل والمسارات</h3>
+                </div>
+                
+                <div class="transport-mode">
+                    <button class="mode-btn active" data-mode="car">
+                        <i class="fas fa-car"></i>
+                        <span>سيارة</span>
+                    </button>
+                    <button class="mode-btn" data-mode="walking">
+                        <i class="fas fa-walking"></i>
+                        <span>مشي</span>
+                    </button>
+                    <button class="mode-btn" data-mode="bicycle">
+                        <i class="fas fa-bicycle"></i>
+                        <span>دراجة</span>
+                    </button>
+                </div>
+
+                <div class="route-actions">
+                    <button class="route-btn" id="setStartPoint">
+                        <i class="fas fa-flag-checkered"></i>
+                        <span>تعيين نقطة الانطلاق</span>
+                    </button>
+                    <button class="route-btn" id="setEndPoint">
+                        <i class="fas fa-flag"></i>
+                        <span>تعيين نقطة الوصول</span>
+                    </button>
+                    <button class="route-btn primary-btn" id="calculateRoute">
+                        <i class="fas fa-directions"></i>
+                        <span>حساب المسار</span>
+                    </button>
+                    <button class="route-btn clear-btn" id="clearRoute">
+                        <i class="fas fa-trash-alt"></i>
+                        <span>مسح المسار</span>
+                    </button>
+                </div>
+
+                <div class="route-info" id="routeInfo" style="display: none;">
+                    <div class="route-distance">
+                        <i class="fas fa-road"></i>
+                        <span id="routeDistance">--</span>
+                    </div>
+                    <div class="route-time">
+                        <i class="fas fa-clock"></i>
+                        <span id="routeTime">--</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="location-info" id="locationInfo">
                 <div class="info-header">
                     <i class="fas fa-location-dot pulse-icon"></i>
@@ -57,6 +140,38 @@
                     <i class="fas fa-crosshairs"></i>
                     <span>تحديد موقعي</span>
                 </button>
+            </div>
+
+            <!-- مشاركة الموقع -->
+            <div class="share-section">
+                <div class="share-header">
+                    <i class="fas fa-share-alt"></i>
+                    <h3>مشاركة الموقع</h3>
+                </div>
+                <div class="share-buttons">
+                    <button class="share-btn whatsapp-btn" id="shareWhatsApp">
+                        <i class="fab fa-whatsapp"></i>
+                        <span>واتساب</span>
+                    </button>
+                    <button class="share-btn telegram-btn" id="shareTelegram">
+                        <i class="fab fa-telegram"></i>
+                        <span>تليجرام</span>
+                    </button>
+                    <button class="share-btn copy-btn" id="copyLocation">
+                        <i class="fas fa-copy"></i>
+                        <span>نسخ الرابط</span>
+                    </button>
+                    <button class="share-btn email-btn" id="shareEmail">
+                        <i class="fas fa-envelope"></i>
+                        <span>بريد إلكتروني</span>
+                    </button>
+                </div>
+                <div class="share-link-box">
+                    <input type="text" id="shareLink" readonly placeholder="رابط الموقع سيظهر هنا...">
+                    <button id="copyLinkBtn">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
             </div>
 
             <div class="coordinates-section">
@@ -85,14 +200,34 @@
                 </div>
                 <div class="map-type-controls">
                     <button class="map-type-btn active" data-type="standard">
-                        <i class="fas fa-map"></i> قياسي
+                        <i class="fas fa-map"></i> عادي
                     </button>
                     <button class="map-type-btn" data-type="satellite">
                         <i class="fas fa-satellite"></i> قمر صناعي
                     </button>
                 </div>
             </div>
+            <div class="navigation-hints">
+                <div class="hint-item">
+                    <i class="fas fa-mouse"></i>
+                    <span>اسحب للتحريك</span>
+                </div>
+                <div class="hint-item">
+                    <i class="fas fa-scroll"></i>
+                    <span>مرر للتكبير</span>
+                </div>
+                <div class="hint-item">
+                    <i class="fas fa-arrow-right"></i>
+                    <span>Ctrl + اسحب للإمالة</span>
+                </div>
+            </div>
         </div>
+    </div>
+
+    <!-- نافذة تأكيد المشاركة -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span>تم نسخ الرابط بنجاح!</span>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
