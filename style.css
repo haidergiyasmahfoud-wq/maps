@@ -1,313 +1,405 @@
-:root {
-    --bg: #0a1628; --bg2: #111d32; --bg3: #182438;
-    --tx: #e8edf5; --tx2: #8fa3b8; --tx3: #5a6f85;
-    --bd: rgba(255,255,255,0.08); --pr: #4facfe; --pr2: #8b5cf6;
-    --gr: linear-gradient(135deg, #4facfe, #8b5cf6);
-    --sc: #06d6a0; --dg: #ff6b6b;
-    --hdr: 50px; --bnav: 58px;
-    --safe: env(safe-area-inset-bottom, 0px);
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
-[data-theme="dark"] { --bg: #060e1a; --bg2: #0a1525; --bg3: #101b2e; }
 
-* { margin:0; padding:0; box-sizing:border-box; }
-html { font-size:16px; -webkit-tap-highlight-color:transparent; }
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: var(--bg); color: var(--tx);
-    height: 100vh; height: 100dvh; overflow: hidden;
-    position: fixed; width: 100%;
-}
-input, select, button { font-family: inherit; }
-
-/* ====== الخريطة - الطبقة 0 ====== */
-#map { position: fixed; inset: 0; z-index: 1; }
-
-/* ====== شاشة التحميل - الطبقة 999 ====== */
-.loading-screen {
-    position: fixed; inset: 0; background: var(--bg); z-index: 9999;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    transition: .4s;
-}
-.loading-screen.hide { opacity:0; visibility:hidden; }
-.loading-screen i { font-size:50px; background:var(--gr); -webkit-background-clip:text; -webkit-text-fill-color:transparent; animation: bounce 1.5s infinite; margin-bottom:12px; }
-@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-.loading-screen h2 { font-size:20px; margin-bottom:15px; }
-.load-bar { width:140px; height:3px; background:rgba(255,255,255,.1); border-radius:10px; }
-.load-bar div { height:100%; background:var(--gr); border-radius:10px; animation: fill 2s ease forwards; }
-@keyframes fill { from{width:0} to{width:100%} }
-
-/* ====== الهيدر - الطبقة 100 ====== */
-.header {
-    position: fixed; top:0; left:0; right:0; height:var(--hdr);
-    background: var(--bg2); z-index: 100;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 8px; border-bottom: 1px solid var(--bd);
-}
-.h-btn {
-    width:36px; height:36px; border-radius:50%; border:none;
-    background:var(--bg3); color:var(--tx); font-size:16px;
-    cursor:pointer; display:flex; align-items:center; justify-content:center;
-}
-.h-btn:active { background:var(--pr); color:#fff; }
-.h-title { display:flex; align-items:center; gap:6px; font-size:15px; font-weight:700; }
-.h-title i { color:var(--pr); }
-
-/* ====== أزرار الخريطة - الطبقة 50 ====== */
-.map-btns {
-    position: fixed; right:8px; top:50%; transform:translateY(-50%);
-    z-index: 50; display:flex; flex-direction:column; gap:5px;
-}
-.mb {
-    width:38px; height:38px; border-radius:50%; border:1px solid var(--bd);
-    background:rgba(17,29,50,.9); backdrop-filter:blur(5px);
-    color:var(--tx); font-size:17px; cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
-}
-.mb:active { background:var(--pr); color:#fff; }
-
-/* الطبقات */
-.layer-popup {
-    position: fixed; right:52px; top:50%; transform:translateY(-50%);
-    z-index: 51; background:var(--bg2); border:1px solid var(--bd);
-    border-radius:12px; padding:4px; display:none; flex-direction:column; gap:2px;
-}
-.lp {
-    padding:8px 12px; border:none; border-radius:8px; background:transparent;
-    color:var(--tx2); font-size:12px; cursor:pointer; white-space:nowrap;
-}
-.lp.active { background:var(--gr); color:#fff; }
-
-/* ====== شريط الملاحة - الطبقة 80 ====== */
-.nav-top {
-    position: fixed; top:55px; left:50%; transform:translateX(-50%);
-    z-index: 80; background:var(--bg2); border:1px solid var(--bd);
-    border-radius:14px; padding:10px 12px; width:90%; max-width:350px;
-    display:none; align-items:center; gap:8px;
-}
-.nav-arr {
-    width:36px; height:36px; border-radius:50%; background:var(--gr);
-    display:flex; align-items:center; justify-content:center; color:#fff; font-size:16px;
-}
-.nav-close {
-    width:26px; height:26px; border-radius:50%; border:none;
-    background:rgba(255,255,255,.1); color:#fff; cursor:pointer; font-size:13px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #0c1929 0%, #1a1a3e 100%);
+    height: 100vh;
+    overflow: hidden;
 }
 
-/* ====== لوحة المسار - الطبقة 90 ====== */
-.route-panel {
-    position: fixed; bottom:var(--bnav); left:0; right:0;
-    z-index: 90; background:var(--bg2); border-radius:18px 18px 0 0;
-    padding:0 14px 14px; box-shadow:0 -4px 20px rgba(0,0,0,.3);
-    display:none; max-height:50vh; overflow-y:auto;
-}
-.rp-handle { width:30px; height:4px; background:var(--bd); border-radius:10px; margin:8px auto; }
-.rp-tabs { display:flex; gap:4px; background:var(--bg3); border-radius:10px; padding:3px; margin-bottom:10px; }
-.rpt {
-    flex:1; padding:8px; border:none; border-radius:8px; background:transparent;
-    color:var(--tx2); font-size:11px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px;
-}
-.rpt i { font-size:15px; }
-.rpt.active { background:var(--gr); color:#fff; }
-.rp-inputs { display:flex; flex-direction:column; gap:4px; margin-bottom:10px; }
-.rpi {
-    display:flex; align-items:center; gap:8px; background:var(--bg3);
-    border:1px solid var(--bd); border-radius:10px; padding:6px 10px;
-}
-.dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-.dot.g { background:var(--sc); } .dot.r { background:var(--dg); }
-.rpi input {
-    flex:1; background:transparent; border:none; padding:8px 0;
-    color:var(--tx); font-size:13px; outline:none;
-}
-.rpi input::placeholder { color:var(--tx3); }
-.rpi button {
-    width:26px; height:26px; border-radius:50%; border:1px solid var(--bd);
-    background:var(--bg2); color:var(--pr); cursor:pointer; font-size:11px; flex-shrink:0;
-}
-.rp-result {
-    display:none; background:var(--bg3); border-radius:10px; padding:10px;
-    display:none; flex-wrap:wrap; gap:8px; align-items:center;
-}
-.rp-result div { font-size:13px; display:flex; align-items:center; gap:4px; }
-.rp-result div i { color:var(--pr); }
-.rp-result button {
-    margin-left:auto; padding:8px 16px; background:var(--gr); border:none;
-    border-radius:10px; color:#fff; font-size:13px; font-weight:600; cursor:pointer;
-    display:flex; align-items:center; gap:5px;
+.container {
+    display: flex;
+    height: 100vh;
+    position: relative;
 }
 
-/* ====== شريط سفلي - الطبقة 100 ====== */
-.bottom-nav {
-    position: fixed; bottom:0; left:0; right:0; height:var(--bnav);
-    background:var(--bg2); z-index: 100;
-    display:flex; align-items:center; justify-content:space-around;
-    border-top:1px solid var(--bd); padding-bottom:var(--safe);
-}
-.bn {
-    display:flex; flex-direction:column; align-items:center; gap:2px;
-    padding:6px 8px; border:none; background:transparent;
-    color:var(--tx3); font-size:10px; cursor:pointer; min-width:45px;
-}
-.bn i { font-size:18px; }
-.bn.active { color:var(--pr); }
-.bn:active { transform:scale(.9); }
-
-/* ====== القائمة الجانبية - الطبقة 200 ====== */
-.overlay {
-    position: fixed; inset:0; background:rgba(0,0,0,.5); z-index:200;
-    opacity:0; visibility:hidden; transition:.3s;
-}
-.overlay.show { opacity:1; visibility:visible; }
+/* الشريط الجانبي */
 .sidebar {
-    position: fixed; top:0; right:0; width:80%; max-width:320px;
-    height:100%; height:100dvh; background:var(--bg2); z-index:201;
-    transform:translateX(100%); transition:.3s; overflow-y:auto;
-    padding-bottom:20px; box-shadow:-5px 0 20px rgba(0,0,0,.3);
-}
-.sidebar.show { transform:translateX(0); }
-.side-head {
-    display:flex; align-items:center; justify-content:space-between;
-    padding:12px 14px; border-bottom:1px solid var(--bd); position:sticky; top:0; background:var(--bg2);
-}
-.side-head h3 { font-size:16px; display:flex; align-items:center; gap:6px; }
-#sideClose {
-    width:30px; height:30px; border-radius:50%; border:none;
-    background:var(--bg3); color:var(--tx); font-size:18px; cursor:pointer;
-}
-.side-search {
-    display:flex; align-items:center; background:var(--bg3); border:1px solid var(--bd);
-    border-radius:10px; margin:10px 14px; padding:0 8px; gap:6px;
-}
-.side-search i { color:var(--pr); font-size:14px; }
-.side-search input {
-    flex:1; background:transparent; border:none; padding:10px 0;
-    color:var(--tx); font-size:13px; outline:none;
-}
-.side-search input::placeholder { color:var(--tx3); }
-.side-search button {
-    width:28px; height:28px; border-radius:50%; border:none;
-    background:var(--gr); color:#fff; cursor:pointer; font-size:12px; flex-shrink:0;
-}
-.side-sec { padding:8px 14px; }
-.side-sec h4 { font-size:11px; color:var(--tx3); margin-bottom:8px; text-transform:uppercase; }
-.chips { display:flex; flex-wrap:wrap; gap:6px; }
-.ch {
-    padding:7px 12px; border-radius:16px; border:1px solid var(--bd);
-    background:var(--bg3); color:var(--tx); font-size:12px; cursor:pointer;
-}
-.ch:active { background:var(--pr); border-color:var(--pr); color:#fff; }
-#favSide { color:var(--tx3); font-size:12px; }
-
-/* الإعدادات */
-.set-row {
-    display:flex; align-items:center; justify-content:space-between;
-    padding:10px 0; border-bottom:1px solid var(--bd); font-size:13px;
-}
-.sw { position:relative; width:44px; height:24px; display:inline-block; }
-.sw input { display:none; }
-.sw span {
-    position:absolute; inset:0; background:var(--bg3); border-radius:24px;
-    cursor:pointer; transition:.25s; border:1px solid var(--bd);
-}
-.sw span::before {
-    content:''; position:absolute; width:18px; height:18px; border-radius:50%;
-    background:#fff; top:2px; left:2px; transition:.25s;
-}
-.sw input:checked + span { background:var(--pr); border-color:var(--pr); }
-.sw input:checked + span::before { transform:translateX(20px); }
-
-/* ====== لوحات سفلية - الطبقة 95 ====== */
-.bottom-sheet {
-    position: fixed; bottom:var(--bnav); left:0; right:0;
-    z-index: 95; background:var(--bg2); border-radius:18px 18px 0 0;
-    padding:0 14px 14px; box-shadow:0 -4px 20px rgba(0,0,0,.3);
-    transform:translateY(100%); transition:.3s; max-height:45vh; overflow-y:auto;
-}
-.bottom-sheet.show { transform:translateY(0); }
-.bs-handle { width:30px; height:4px; background:var(--bd); border-radius:10px; margin:8px auto; }
-.bottom-sheet h3 { text-align:center; padding:8px 0 12px; font-size:16px; }
-.bs-clear {
-    width:100%; padding:10px; margin-top:10px; border:1px solid var(--dg);
-    border-radius:10px; background:transparent; color:var(--dg); cursor:pointer; font-size:13px;
+    width: 380px;
+    background: linear-gradient(180deg, 
+        rgba(15, 30, 60, 0.95) 0%, 
+        rgba(20, 25, 65, 0.95) 50%,
+        rgba(15, 20, 55, 0.95) 100%);
+    backdrop-filter: blur(20px);
+    border-left: 2px solid rgba(100, 180, 255, 0.2);
+    box-shadow: -5px 0 30px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    padding: 25px;
+    z-index: 1000;
+    overflow-y: auto;
 }
 
-/* ====== مودال - الطبقة 300 ====== */
-.modal { position:fixed; inset:0; z-index:300; display:none; align-items:flex-end; }
-.modal.show { display:flex; }
-.modal-bg { position:absolute; inset:0; background:rgba(0,0,0,.55); }
-.modal-box {
-    position:relative; background:var(--bg2); border-radius:18px 18px 0 0;
-    padding:14px 16px 20px; width:100%; max-height:70vh; overflow-y:auto;
-    z-index:1; animation:up .3s; padding-bottom:calc(20px + var(--safe));
-}
-@keyframes up { from{transform:translateY(100%)} to{transform:translateY(0)} }
-.modal-box h3 { text-align:center; margin-bottom:12px; font-size:16px; }
-.sh-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px; }
-.shb {
-    padding:12px 6px; border:1px solid var(--bd); border-radius:10px;
-    background:var(--bg3); color:var(--tx); font-size:11px; cursor:pointer;
-    display:flex; flex-direction:column; align-items:center; gap:4px;
-}
-.shb i { font-size:18px; }
-.shb:active { transform:scale(.95); }
-.em-btn {
-    width:100%; padding:13px; border:none; border-radius:10px; color:#fff;
-    font-size:14px; font-weight:600; cursor:pointer; margin-bottom:6px;
-    display:flex; align-items:center; gap:8px;
-}
-.em-btn:active { transform:scale(.97); }
-.modal-cancel {
-    width:100%; padding:12px; border:1px solid var(--bd); border-radius:10px;
-    background:transparent; color:var(--tx); font-size:14px; cursor:pointer; margin-top:4px;
+/* تخصيص شريط التمرير */
+.sidebar::-webkit-scrollbar {
+    width: 8px;
 }
 
-/* ====== توست ====== */
-.toast {
-    position:fixed; bottom:calc(var(--bnav) + 15px + var(--safe)); left:50%;
-    transform:translateX(-50%) translateY(120px); z-index:400;
-    background:var(--bg2); border:1px solid var(--pr); border-radius:20px;
-    padding:10px 20px; font-size:13px; white-space:nowrap;
-    transition:.3s; box-shadow:0 4px 15px rgba(0,0,0,.3);
+.sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
 }
-.toast.show { transform:translateX(-50%) translateY(0); }
 
-/* ====== صوت ====== */
-.voice-popup {
-    position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:500;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; color:#fff;
+.sidebar::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #4facfe, #8b5cf6);
+    border-radius: 10px;
 }
-.vp-ring {
-    width:80px; height:80px; border-radius:50%; border:3px solid var(--pr);
-    animation: vpulse 1.4s infinite; margin-bottom:15px;
-}
-@keyframes vpulse { 0%{transform:scale(.8);opacity:1} 100%{transform:scale(1.3);opacity:0} }
-.voice-popup i { font-size:32px; position:absolute; }
-.voice-popup p { margin-top:70px; }
 
-/* ====== ماركر ====== */
-.custom-marker { background:transparent!important; border:none!important; }
+/* اللوجو */
+.logo-section {
+    text-align: center;
+    padding: 20px 0;
+    margin-bottom: 25px;
+    border-bottom: 2px solid rgba(100, 180, 255, 0.2);
+}
+
+.logo-icon {
+    font-size: 50px;
+    background: linear-gradient(135deg, #4facfe, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 0 15px rgba(79, 172, 254, 0.5));
+}
+
+.logo-text {
+    font-size: 28px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #4facfe, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 5px 0;
+}
+
+.logo-subtitle {
+    color: rgba(200, 210, 240, 0.8);
+    font-size: 14px;
+    letter-spacing: 1px;
+}
+
+/* البحث */
+.search-section {
+    margin-bottom: 25px;
+}
+
+.search-box {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.search-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #4facfe;
+    font-size: 18px;
+}
+
+#searchInput {
+    width: 100%;
+    padding: 14px 45px 14px 20px;
+    border: 2px solid rgba(100, 180, 255, 0.3);
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+#searchInput::placeholder {
+    color: rgba(200, 210, 240, 0.6);
+}
+
+#searchInput:focus {
+    outline: none;
+    border-color: #4facfe;
+    box-shadow: 0 0 20px rgba(79, 172, 254, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.city-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.city-btn {
+    padding: 12px;
+    border: 1px solid rgba(100, 180, 255, 0.3);
+    border-radius: 12px;
+    background: rgba(100, 180, 255, 0.1);
+    color: #c8d2f0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.city-btn i {
+    color: #4facfe;
+}
+
+.city-btn:hover {
+    background: rgba(100, 180, 255, 0.2);
+    border-color: #4facfe;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
+}
+
+/* معلومات الموقع */
+.location-info {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 25px;
+    border: 1px solid rgba(100, 180, 255, 0.2);
+}
+
+.info-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.info-header i {
+    font-size: 24px;
+    color: #4facfe;
+}
+
+.pulse-icon {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.info-header h3 {
+    color: #c8d2f0;
+    font-size: 18px;
+}
+
+.info-content {
+    color: #a0b0d0;
+    margin-bottom: 15px;
+    min-height: 50px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.waiting-text {
+    color: #6b7fa0;
+    font-style: italic;
+}
+
+.locate-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #4facfe, #8b5cf6);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: inherit;
+    font-weight: 600;
+}
+
+.locate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+}
+
+.locate-btn:active {
+    transform: scale(0.98);
+}
+
+/* الإحداثيات */
+.coordinates-section {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.coord-box {
+    background: rgba(100, 180, 255, 0.1);
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid rgba(100, 180, 255, 0.3);
+}
+
+.coord-label {
+    display: block;
+    color: #8b9dc0;
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.coord-value {
+    display: block;
+    color: #4facfe;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+/* الخريطة */
+.map-container {
+    flex: 1;
+    position: relative;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+}
+
+.map-overlay {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+}
+
+.zoom-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.zoom-btn {
+    width: 40px;
+    height: 40px;
+    border: 1px solid rgba(100, 180, 255, 0.3);
+    border-radius: 10px;
+    background: rgba(15, 30, 60, 0.9);
+    color: #4facfe;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.zoom-btn:hover {
+    background: rgba(100, 180, 255, 0.2);
+    border-color: #4facfe;
+}
+
+.map-type-controls {
+    display: flex;
+    gap: 5px;
+}
+
+.map-type-btn {
+    padding: 10px 15px;
+    border: 1px solid rgba(100, 180, 255, 0.3);
+    border-radius: 10px;
+    background: rgba(15, 30, 60, 0.9);
+    color: #a0b0d0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 13px;
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: inherit;
+}
+
+.map-type-btn.active {
+    background: linear-gradient(135deg, #4facfe, #8b5cf6);
+    border-color: transparent;
+    color: #fff;
+}
+
+.map-type-btn:hover {
+    border-color: #4facfe;
+}
+
+/* تخصيص علامة الموقع */
+.custom-marker {
+    background: transparent;
+    border: none;
+}
+
 .marker-pin {
-    width:24px; height:24px; border-radius:50% 50% 50% 0;
-    background:var(--pr); position:absolute; transform:rotate(-45deg);
-    left:50%; top:50%; margin:-16px 0 0 -12px;
-    box-shadow:0 0 12px rgba(79,172,254,.5);
+    width: 30px;
+    height: 30px;
+    border-radius: 50% 50% 50% 0;
+    background: #4facfe;
+    position: absolute;
+    transform: rotate(-45deg);
+    left: 50%;
+    top: 50%;
+    margin: -20px 0 0 -15px;
+    box-shadow: 0 0 20px rgba(79, 172, 254, 0.6);
 }
-.marker-pin::after {
-    content:''; width:10px; height:10px; margin:7px 0 0 7px;
-    background:#fff; position:absolute; border-radius:50%;
-}
-.marker-pin.u { background:var(--dg); box-shadow:0 0 14px rgba(255,107,107,.6); }
-.marker-pin.n { background:var(--sc); box-shadow:0 0 14px rgba(6,214,160,.6); }
 
-/* ====== سطح مكتب ====== */
-@media (min-width:1024px) {
-    .header { display:none; }
-    .bottom-nav { display:none; }
-    .sidebar { position:fixed; transform:translateX(0); width:300px; border-right:1px solid var(--bd); }
-    .overlay { display:none; }
-    #sideClose { display:none; }
-    #map { left:300px; }
-    .map-btns { right:316px; }
-    .route-panel { left:300px; }
-    .bottom-sheet { left:300px; }
+.marker-pin::after {
+    content: '';
+    width: 14px;
+    height: 14px;
+    margin: 8px 0 0 8px;
+    background: #fff;
+    position: absolute;
+    border-radius: 50%;
+}
+
+/* تأثيرات إضافية */
+.coord-value.updated {
+    animation: flash 0.5s ease;
+}
+
+@keyframes flash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* تصميم متجاوب */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        max-height: 40vh;
+        border-left: none;
+        border-bottom: 2px solid rgba(100, 180, 255, 0.2);
+    }
+
+    .map-container {
+        height: 60vh;
+    }
 }
