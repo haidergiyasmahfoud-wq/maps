@@ -19,7 +19,7 @@ body {
 
 /* الشريط الجانبي */
 .sidebar {
-    width: 380px;
+    width: 420px;
     background: linear-gradient(180deg, 
         rgba(15, 30, 60, 0.95) 0%, 
         rgba(20, 25, 65, 0.95) 50%,
@@ -29,12 +29,12 @@ body {
     box-shadow: -5px 0 30px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
-    padding: 25px;
+    padding: 20px;
     z-index: 1000;
     overflow-y: auto;
+    gap: 18px;
 }
 
-/* تخصيص شريط التمرير */
 .sidebar::-webkit-scrollbar {
     width: 8px;
 }
@@ -52,45 +52,154 @@ body {
 /* اللوجو */
 .logo-section {
     text-align: center;
-    padding: 20px 0;
-    margin-bottom: 25px;
+    padding: 15px 0;
+    margin-bottom: 5px;
     border-bottom: 2px solid rgba(100, 180, 255, 0.2);
 }
 
 .logo-icon {
-    font-size: 50px;
+    font-size: 45px;
     background: linear-gradient(135deg, #4facfe, #8b5cf6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     filter: drop-shadow(0 0 15px rgba(79, 172, 254, 0.5));
+    animation: rotate3d 3s infinite;
+}
+
+@keyframes rotate3d {
+    0%, 100% { transform: rotateY(0deg); }
+    50% { transform: rotateY(180deg); }
 }
 
 .logo-text {
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 700;
     background: linear-gradient(135deg, #4facfe, #a78bfa);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    margin: 5px 0;
+    margin: 3px 0;
 }
 
 .logo-subtitle {
     color: rgba(200, 210, 240, 0.8);
-    font-size: 14px;
+    font-size: 13px;
     letter-spacing: 1px;
+}
+
+/* التحكم ثلاثي الأبعاد */
+.controls-3d {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 18px;
+    border: 1px solid rgba(100, 180, 255, 0.2);
+}
+
+.control-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.control-header i {
+    font-size: 22px;
+    color: #4facfe;
+    animation: rotate3d 4s infinite;
+}
+
+.control-header h3 {
+    color: #c8d2f0;
+    font-size: 17px;
+}
+
+.pitch-control, .bearing-control {
+    margin-bottom: 12px;
+}
+
+.pitch-control label, .bearing-control label {
+    display: block;
+    color: #8b9dc0;
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.slider {
+    width: 100%;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: linear-gradient(90deg, #4facfe, #8b5cf6);
+    border-radius: 3px;
+    outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(79, 172, 254, 0.5);
+    border: 2px solid #4facfe;
+}
+
+.slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(79, 172, 254, 0.5);
+    border: 2px solid #4facfe;
+}
+
+.pitch-value, .bearing-value {
+    color: #4facfe;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 5px;
+    display: inline-block;
+}
+
+.rotation-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.rotate-btn {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid rgba(100, 180, 255, 0.3);
+    border-radius: 12px;
+    background: rgba(100, 180, 255, 0.1);
+    color: #4facfe;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 16px;
+    font-family: inherit;
+}
+
+.rotate-btn:hover {
+    background: rgba(100, 180, 255, 0.2);
+    border-color: #4facfe;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
 }
 
 /* البحث */
 .search-section {
-    margin-bottom: 25px;
+    margin-bottom: 5px;
 }
 
 .search-box {
     position: relative;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
 }
 
 .search-icon {
@@ -104,12 +213,12 @@ body {
 
 #searchInput {
     width: 100%;
-    padding: 14px 45px 14px 20px;
+    padding: 12px 45px 12px 20px;
     border: 2px solid rgba(100, 180, 255, 0.3);
     border-radius: 15px;
     background: rgba(255, 255, 255, 0.05);
     color: #fff;
-    font-size: 15px;
+    font-size: 14px;
     transition: all 0.3s ease;
     font-family: inherit;
 }
@@ -128,23 +237,23 @@ body {
 .city-buttons {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    gap: 8px;
 }
 
 .city-btn {
-    padding: 12px;
+    padding: 10px;
     border: 1px solid rgba(100, 180, 255, 0.3);
     border-radius: 12px;
     background: rgba(100, 180, 255, 0.1);
     color: #c8d2f0;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-size: 14px;
+    font-size: 13px;
     font-family: inherit;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
 }
 
 .city-btn i {
@@ -158,12 +267,149 @@ body {
     box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
 }
 
+/* قسم التنقل والمسارات */
+.navigation-section {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 18px;
+    border: 1px solid rgba(100, 180, 255, 0.2);
+}
+
+.nav-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.nav-header i {
+    font-size: 22px;
+    color: #4facfe;
+}
+
+.nav-header h3 {
+    color: #c8d2f0;
+    font-size: 17px;
+}
+
+.transport-mode {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    padding: 5px;
+}
+
+.mode-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: #8b9dc0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 13px;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.mode-btn.active {
+    background: linear-gradient(135deg, #4facfe, #8b5cf6);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+}
+
+.mode-btn:hover:not(.active) {
+    color: #4facfe;
+    background: rgba(100, 180, 255, 0.1);
+}
+
+.route-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.route-btn {
+    padding: 10px;
+    border: 1px solid rgba(100, 180, 255, 0.3);
+    border-radius: 12px;
+    background: rgba(100, 180, 255, 0.1);
+    color: #c8d2f0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 13px;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.route-btn:hover {
+    background: rgba(100, 180, 255, 0.2);
+    border-color: #4facfe;
+    transform: translateY(-2px);
+}
+
+.route-btn.primary-btn {
+    background: linear-gradient(135deg, #4facfe, #8b5cf6);
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+}
+
+.route-btn.primary-btn:hover {
+    box-shadow: 0 6px 20px rgba(79, 172, 254, 0.5);
+    transform: translateY(-2px);
+}
+
+.route-btn.clear-btn {
+    border-color: rgba(255, 107, 107, 0.3);
+    background: rgba(255, 107, 107, 0.1);
+    color: #ff6b6b;
+}
+
+.route-btn.clear-btn:hover {
+    background: rgba(255, 107, 107, 0.2);
+    border-color: #ff6b6b;
+}
+
+.route-info {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    justify-content: space-around;
+}
+
+.route-distance, .route-time {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #c8d2f0;
+}
+
+.route-distance i {
+    color: #4facfe;
+}
+
+.route-time i {
+    color: #8b5cf6;
+}
+
 /* معلومات الموقع */
 .location-info {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 20px;
-    padding: 20px;
-    margin-bottom: 25px;
+    padding: 18px;
     border: 1px solid rgba(100, 180, 255, 0.2);
 }
 
@@ -171,11 +417,11 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
 }
 
 .info-header i {
-    font-size: 24px;
+    font-size: 22px;
     color: #4facfe;
 }
 
@@ -200,14 +446,14 @@ body {
 
 .info-header h3 {
     color: #c8d2f0;
-    font-size: 18px;
+    font-size: 17px;
 }
 
 .info-content {
     color: #a0b0d0;
-    margin-bottom: 15px;
-    min-height: 50px;
-    font-size: 14px;
+    margin-bottom: 12px;
+    min-height: 45px;
+    font-size: 13px;
     line-height: 1.6;
 }
 
@@ -218,12 +464,12 @@ body {
 
 .locate-btn {
     width: 100%;
-    padding: 14px;
+    padding: 12px;
     background: linear-gradient(135deg, #4facfe, #8b5cf6);
     border: none;
     border-radius: 12px;
     color: #fff;
-    font-size: 16px;
+    font-size: 15px;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
@@ -243,16 +489,129 @@ body {
     transform: scale(0.98);
 }
 
+/* مشاركة الموقع */
+.share-section {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 18px;
+    border: 1px solid rgba(100, 180, 255, 0.2);
+}
+
+.share-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.share-header i {
+    font-size: 22px;
+    color: #4facfe;
+}
+
+.share-header h3 {
+    color: #c8d2f0;
+    font-size: 17px;
+}
+
+.share-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.share-btn {
+    padding: 10px;
+    border: 1px solid rgba(100, 180, 255, 0.3);
+    border-radius: 12px;
+    background: rgba(100, 180, 255, 0.1);
+    color: #c8d2f0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 13px;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.share-btn.whatsapp-btn {
+    border-color: rgba(37, 211, 102, 0.3);
+    background: rgba(37, 211, 102, 0.1);
+}
+
+.share-btn.whatsapp-btn:hover {
+    background: rgba(37, 211, 102, 0.2);
+    border-color: #25d366;
+    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+}
+
+.share-btn.telegram-btn {
+    border-color: rgba(0, 136, 204, 0.3);
+    background: rgba(0, 136, 204, 0.1);
+}
+
+.share-btn.telegram-btn:hover {
+    background: rgba(0, 136, 204, 0.2);
+    border-color: #0088cc;
+    box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3);
+}
+
+.share-btn.copy-btn, 
+.share-btn.email-btn {
+    border-color: rgba(100, 180, 255, 0.3);
+    background: rgba(100, 180, 255, 0.1);
+}
+
+.share-btn.copy-btn:hover, 
+.share-btn.email-btn:hover {
+    background: rgba(100, 180, 255, 0.2);
+    border-color: #4facfe;
+}
+
+.share-link-box {
+    display: flex;
+    gap: 8px;
+}
+
+#shareLink {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid rgba(100, 180, 255, 0.3);
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    color: #a0b0d0;
+    font-size: 12px;
+    font-family: inherit;
+}
+
+#copyLinkBtn {
+    padding: 10px 15px;
+    border: 1px solid rgba(100, 180, 255, 0.3);
+    border-radius: 12px;
+    background: rgba(100, 180, 255, 0.2);
+    color: #4facfe;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+#copyLinkBtn:hover {
+    background: rgba(100, 180, 255, 0.3);
+}
+
 /* الإحداثيات */
 .coordinates-section {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
 }
 
 .coord-box {
     background: rgba(100, 180, 255, 0.1);
-    padding: 15px;
+    padding: 12px 8px;
     border-radius: 12px;
     text-align: center;
     border: 1px solid rgba(100, 180, 255, 0.3);
@@ -261,15 +620,24 @@ body {
 .coord-label {
     display: block;
     color: #8b9dc0;
-    font-size: 12px;
-    margin-bottom: 8px;
+    font-size: 10px;
+    margin-bottom: 5px;
 }
 
 .coord-value {
     display: block;
     color: #4facfe;
-    font-size: 18px;
+    font-size: 14px;
     font-weight: 700;
+}
+
+.coord-value.updated {
+    animation: flash 0.5s ease;
+}
+
+@keyframes flash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
 }
 
 /* الخريطة */
@@ -308,6 +676,9 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .zoom-btn:hover {
@@ -346,23 +717,126 @@ body {
     border-color: #4facfe;
 }
 
-/* تخصيص علامة الموقع */
+/* تلميحات التنقل */
+.navigation-hints {
+    position: absolute;
+    bottom: 30px;
+    left: 20px;
+    background: rgba(15, 30, 60, 0.95);
+    border: 1px solid rgba(100, 180, 255, 0.3);
+    border-radius: 12px;
+    padding: 12px 15px;
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 1000;
+}
+
+.hint-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #c8d2f0;
+    font-size: 12px;
+}
+
+.hint-item i {
+    color: #4facfe;
+    width: 20px;
+    text-align: center;
+}
+
+/* توست الإشعارات */
+.toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #4facfe, #8b5cf6);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(79, 172, 254, 0.4);
+}
+
+.toast.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-10px);
+}
+
+/* تخصيص خريطة Mapbox */
+.mapboxgl-ctrl-attrib {
+    background: rgba(15, 30, 60, 0.8) !important;
+    color: #8b9dc0 !important;
+    font-size: 10px !important;
+}
+
+.mapboxgl-ctrl-attrib a {
+    color: #4facfe !important;
+}
+
+.mapboxgl-popup {
+    z-index: 1000;
+}
+
+.mapboxgl-popup-content {
+    background: rgba(15, 30, 60, 0.95) !important;
+    color: #fff !important;
+    border: 1px solid rgba(100, 180, 255, 0.3) !important;
+    border-radius: 12px !important;
+    padding: 15px !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+.mapboxgl-popup-close-button {
+    color: #fff !important;
+    font-size: 18px !important;
+}
+
+/* تخصيص أزرار NavigationControl */
+.mapboxgl-ctrl-group {
+    border: 1px solid rgba(100, 180, 255, 0.3) !important;
+    border-radius: 10px !important;
+    overflow: hidden;
+}
+
+.mapboxgl-ctrl-group button {
+    background: rgba(15, 30, 60, 0.9) !important;
+    border-color: rgba(100, 180, 255, 0.2) !important;
+}
+
+.mapboxgl-ctrl-group button:hover {
+    background: rgba(100, 180, 255, 0.2) !important;
+}
+
+.mapboxgl-ctrl-icon {
+    filter: invert(0.7) sepia(1) saturate(5) hue-rotate(175deg) !important;
+}
+
+/* علامة مخصصة */
 .custom-marker {
-    background: transparent;
-    border: none;
+    cursor: pointer;
 }
 
 .marker-pin {
     width: 30px;
     height: 30px;
     border-radius: 50% 50% 50% 0;
-    background: #4facfe;
     position: absolute;
     transform: rotate(-45deg);
     left: 50%;
     top: 50%;
     margin: -20px 0 0 -15px;
-    box-shadow: 0 0 20px rgba(79, 172, 254, 0.6);
 }
 
 .marker-pin::after {
@@ -373,16 +847,6 @@ body {
     background: #fff;
     position: absolute;
     border-radius: 50%;
-}
-
-/* تأثيرات إضافية */
-.coord-value.updated {
-    animation: flash 0.5s ease;
-}
-
-@keyframes flash {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
 }
 
 /* تصميم متجاوب */
@@ -397,9 +861,16 @@ body {
         max-height: 40vh;
         border-left: none;
         border-bottom: 2px solid rgba(100, 180, 255, 0.2);
+        border-radius: 0;
     }
 
     .map-container {
         height: 60vh;
+    }
+    
+    .navigation-hints {
+        bottom: 10px;
+        left: 10px;
+        font-size: 10px;
     }
 }
